@@ -889,12 +889,32 @@ def update_gemini_key(req: SaveKeyRequest):
 LOGO_PATH = r"C:\Users\aasho\AppData\Local\PackagingCompliance\logo.png"
 
 
+LOGO_PATH = os.path.join(STATIC_DIR, "logo.png")
+
+
 @app.get("/static/logo.png")
 @app.get("/logo.png")
 def serve_logo():
     if os.path.exists(LOGO_PATH):
         return FileResponse(LOGO_PATH, media_type="image/png")
-    raise HTTPException(status_code=404, detail="Logo not found")
+    # Dynamic SVG fallback if file is missing
+    svg_fallback = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+      <circle cx="50" cy="50" r="46" fill="#0A2540" stroke="#D4AF37" stroke-width="4"/>
+      <circle cx="50" cy="50" r="40" fill="#061B2E" stroke="#F59E0B" stroke-width="1.5"/>
+      <path d="M50 20 L50 75 M32 32 L68 32 M32 32 L26 50 M32 32 L38 50 M68 32 L62 50 M68 32 L74 50" stroke="#D4AF37" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M22 50 Q32 58 42 50 Z M58 50 Q68 58 78 50 Z" fill="#F59E0B" stroke="#D4AF37" stroke-width="1.5"/>
+      <rect x="42" y="75" width="16" height="6" rx="2" fill="#D4AF37"/>
+    </svg>'''
+    return Response(content=svg_fallback, media_type="image/svg+xml")
+
+
+@app.get("/presentation")
+@app.get("/deck")
+def serve_presentation():
+    pres_path = os.path.join(STATIC_DIR, "presentation.html")
+    if os.path.exists(pres_path):
+        return FileResponse(pres_path)
+    raise HTTPException(status_code=404, detail="Presentation deck not found")
 
 
 # Serve frontend root
