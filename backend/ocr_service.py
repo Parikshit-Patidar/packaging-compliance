@@ -314,14 +314,14 @@ CRITICAL MANDATORY DECLARATIONS TO EXTRACT WITH ZERO-HALLUCINATION ACCURACY:
     if HAS_GOOGLE_GENAI:
         candidate_models = [
             "gemini-3.5-flash-lite",
-            "gemini-3-flash-preview",
             "gemini-3.6-flash",
             "gemini-flash-latest",
+            "gemini-3-flash-preview",
             "gemini-3.5-flash",
             "gemini-3.7-flash"
         ]
         try:
-            client = genai.Client(api_key=key, http_options=types.HttpOptions(timeout=10000))
+            client = genai.Client(api_key=key, http_options=types.HttpOptions(timeout=15000))
             config = types.GenerateContentConfig(
                 temperature=0.0,
                 top_p=0.1,
@@ -355,12 +355,12 @@ CRITICAL MANDATORY DECLARATIONS TO EXTRACT WITH ZERO-HALLUCINATION ACCURACY:
     if HAS_LEGACY_GENAI:
         try:
             legacy_genai.configure(api_key=key)
-            model = legacy_genai.GenerativeModel("gemini-1.5-flash")
+            model = legacy_genai.GenerativeModel("gemini-3.6-flash")
             response = model.generate_content([prompt, image])
             raw_text = response.text.strip()
             dec = parse_gemini_schema_response(raw_text)
             if dec:
-                dec._model_used = "gemini-1.5-flash-legacy"
+                dec._model_used = "gemini-3.6-flash-legacy"
                 return dec, raw_text
         except Exception as leg_err:
             print("Legacy google.generativeai notice:", leg_err)
