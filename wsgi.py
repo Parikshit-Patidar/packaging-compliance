@@ -1,6 +1,6 @@
 """
 WSGI & ASGI Entrypoint for Cloud Hosting (Render, Heroku, Railway, Gunicorn)
-Supports both ASGI (uvicorn.workers.UvicornWorker) and standard WSGI (via a2wsgi).
+Provides native FastAPI ASGI callable for Uvicorn and Gunicorn UvicornWorker.
 """
 import os
 import sys
@@ -12,15 +12,9 @@ if backend_path not in sys.path:
 
 from api import app
 
-# Expose 'app' for ASGI servers (e.g. uvicorn wsgi:app or gunicorn -k uvicorn.workers.UvicornWorker wsgi:app)
+# Expose both app and application for ASGI servers and UvicornWorker
 app = app
-
-# Expose 'application' for WSGI servers (e.g. gunicorn wsgi:application or gunicorn wsgi)
-try:
-    from a2wsgi import ASGIMiddleware
-    application = ASGIMiddleware(app)
-except Exception:
-    application = app
+application = app
 
 if __name__ == "__main__":
     import uvicorn

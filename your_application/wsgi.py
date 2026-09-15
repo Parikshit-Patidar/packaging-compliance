@@ -15,12 +15,6 @@ if backend_path not in sys.path:
 
 from api import app
 
-# ASGI entrypoint
+# Expose both app and application for ASGI servers and UvicornWorker
 app = app
-
-# WSGI entrypoint for standard Gunicorn
-try:
-    from a2wsgi import ASGIMiddleware
-    application = ASGIMiddleware(app)
-except Exception:
-    application = app
+application = app
