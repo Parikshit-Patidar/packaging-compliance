@@ -1,0 +1,409 @@
+/* National Legal Metrology Compliance Portal (e-LM) - Official Government Theme */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --gov-navy-dark: #061b2e;
+  --gov-navy: #0a2540;
+  --gov-navy-light: #13315c;
+  --gov-gold: #d4af37;
+  --gov-gold-light: #fef08a;
+  --gov-saffron: #ff9933;
+  --gov-white: #ffffff;
+  --gov-green: #138808;
+  --gov-border: #cbd5e1;
+  --success-emerald: #10b981;
+  --warning-amber: #f59e0b;
+  --danger-rose: #ef4444;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #f1f5f9;
+  color: #1e293b;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Government Tricolor Top Ribbon */
+.tricolor-ribbon {
+  height: 4px;
+  width: 100%;
+  display: flex;
+}
+.tricolor-saffron {
+  background-color: #ff9933;
+  flex: 1;
+}
+.tricolor-white {
+  background-color: #ffffff;
+  flex: 1;
+}
+.tricolor-green {
+  background-color: #138808;
+  flex: 1;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Modern Government Glassmorphism Panels */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+}
+
+.glass-panel-gov {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 1px 3px -1px rgba(15, 23, 42, 0.03);
+  transition: all 0.2s ease-in-out;
+}
+
+.metric-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+/* Pulsing Status Dot */
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.2);
+  }
+}
+
+/* Upload Dropzone */
+.dropzone {
+  border: 2px dashed #cbd5e1;
+  background-color: #f8fafc;
+  border-radius: 1rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.dropzone:hover, .dropzone.dragover {
+  border-color: #2563eb;
+  background-color: #eff6ff;
+  transform: translateY(-1px);
+}
+
+/* Camera Viewport */
+.camera-view {
+  transform: scaleX(1);
+  border-radius: 0.75rem;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-color: #000;
+}
+
+/* Compliance Status Badges */
+.badge-compliant {
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+.badge-non-compliant {
+  background-color: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+.badge-critical {
+  background-color: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+}
+
+/* Official Government Navigation Tabs (Distinct Boxed Module Cards) */
+.nav-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1.15rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1.5px solid #334155;
+  background-color: #0b1f33;
+  color: #cbd5e1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+  user-select: none;
+}
+.nav-tab:hover {
+  background-color: #133152;
+  border-color: #60a5fa;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+.nav-tab.active {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  border-color: #93c5fd;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+.nav-tab .tab-icon-box {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+.nav-tab.active .tab-icon-box {
+  background-color: rgba(255, 255, 255, 0.22);
+  color: #fde047;
+}
+.nav-tab .tab-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.nav-tab .tab-subtitle {
+  font-size: 0.6875rem;
+  opacity: 0.75;
+  font-weight: 500;
+  line-height: 1.15;
+}
+.nav-tab .tab-badge {
+  font-size: 0.5625rem;
+  font-weight: 800;
+  padding: 0.1rem 0.375rem;
+  border-radius: 0.25rem;
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  letter-spacing: 0.04em;
+}
+.nav-tab.active .tab-badge {
+  background-color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+}
+
+/* Official Seal Embellishment */
+.gov-seal-glow {
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.35));
+}
+
+/* ==========================================================================
+   INTERACTIVE INSPECTION CANVAS & SVG BOUNDING BOXES
+   ========================================================================== */
+
+.interactive-box-rect {
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  vector-effect: non-scaling-stroke;
+}
+
+.interactive-box-rect.compliant {
+  stroke: #10b981;
+  fill: rgba(16, 185, 129, 0.12);
+  stroke-width: 2.5px;
+}
+
+.interactive-box-rect.violation {
+  stroke: #ef4444;
+  fill: rgba(239, 68, 68, 0.18);
+  stroke-width: 3px;
+  stroke-dasharray: 4, 2;
+}
+
+.interactive-box-rect:hover,
+.interactive-box-rect.spotlight {
+  stroke-width: 4px !important;
+  stroke-dasharray: none !important;
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+.interactive-box-rect.compliant:hover,
+.interactive-box-rect.compliant.spotlight {
+  fill: rgba(16, 185, 129, 0.35);
+  stroke: #34d399;
+}
+
+.interactive-box-rect.violation:hover,
+.interactive-box-rect.violation.spotlight {
+  fill: rgba(239, 68, 68, 0.4);
+  stroke: #f87171;
+}
+
+/* Dim non-highlighted boxes when spotlight is active */
+.svg-has-spotlight .interactive-box-rect:not(.spotlight) {
+  opacity: 0.25;
+}
+
+/* Interactive Declarations Matrix Row */
+.declaration-row {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.declaration-row:hover,
+.declaration-row.active-row {
+  border-color: #3b82f6 !important;
+  background-color: #eff6ff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+}
+
+.declaration-row.active-violation {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
+/* Inspector Floating Tooltip */
+#boxInspectorTooltip {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Caliper Ruler Animation */
+.caliper-line {
+  stroke: #f59e0b;
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.caliper-pulse {
+  animation: caliperPulse 1.8s infinite;
+}
+
+@keyframes caliperPulse {
+  0%, 100% { stroke-opacity: 1; }
+  50% { stroke-opacity: 0.5; }
+}
+
+/* Viewport Controls Toolbar */
+.viewer-btn {
+  transition: all 0.15s ease-in-out;
+}
+.viewer-btn:hover {
+  background-color: #334155;
+  color: #ffffff;
+}
+
+.layer-chip {
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+.layer-chip.active {
+  background-color: #1d4ed8;
+  border-color: #60a5fa;
+  color: #ffffff;
+}
+
+/* Split View Comparison */
+.split-view-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+}
+
+/* 3D Neural Metrology Twin & WebGL Canvas */
+#threejsViewport {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 15;
+}
+
+#threeCanvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  outline: none;
+}
+
+.geo-btn {
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+.geo-btn.active {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #60a5fa !important;
+}
+
+/* Digital Vernier Caliper Overlay */
+#virtualCaliperOverlay {
+  filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.6));
+  z-index: 40;
+}
+
+#caliperBody {
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  user-select: none;
+}
+
+#caliperTrackArea {
+  background: linear-gradient(180deg, #94a3b8 0%, #cbd5e1 50%, #94a3b8 100%);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+}
+
+#caliperMovableJaw {
+  box-shadow: 2px 0 6px rgba(0,0,0,0.4);
+}
+
+/* Print Styles for Direct Audit Certificate Printing */
+@media print {
+  header, nav, .no-print, .tricolor-ribbon, #viewerToolbar {
+    display: none !important;
+  }
+  body {
+    background: #ffffff;
+    padding: 0;
+  }
+  .glass-panel, .glass-panel-gov {
+    box-shadow: none;
+    border: 1px solid #000000;
+  }
+}
+

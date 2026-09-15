@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>National Legal Metrology Compliance Portal | Govt. of India</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 antialiased flex flex-col">
+
+  <!-- Government of India National Tricolor Ribbon -->
+  <div class="tricolor-ribbon">
+    <div class="tricolor-saffron"></div>
+    <div class="tricolor-white"></div>
+    <div class="tricolor-green"></div>
+  </div>
+
+  <!-- Official Ministry Top Navigation Header -->
+  <header class="bg-[#0A2540] text-white shadow-xl sticky top-0 z-50 border-b border-slate-700/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap justify-between items-center gap-4">
+      
+      <!-- Ministry Identity & Official Emblem Seal -->
+      <div class="flex items-center gap-3.5">
+        <!-- User Updated National Packaging Compliance Emblem Logo -->
+        <div class="w-12 h-12 rounded-xl overflow-hidden border border-cyan-400/50 shadow-md flex-shrink-0 bg-[#061B2E] p-0.5 group flex items-center justify-center">
+          <img src="/static/logo.png" alt="National Packaging Compliance Portal Logo" class="w-full h-full object-cover rounded-lg group-hover:scale-105 transition">
+        </div>
+
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] font-semibold text-amber-300 uppercase tracking-widest">भारत सरकार • Government of India</span>
+            <span class="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] px-1.5 py-0.5 rounded font-mono font-bold">e-LM Portal</span>
+          </div>
+          <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-white leading-tight">
+            National Legal Metrology Packaging Compliance System
+          </h1>
+          <p class="text-[11px] text-slate-300">
+            Department of Consumer Affairs • Legal Metrology (Packaged Commodities) Rules, 2011
+          </p>
+        </div>
+      </div>
+
+      <!-- Live Enforcement Terminal, User Guide & Officer Profile -->
+      <div class="flex items-center gap-2.5 text-xs">
+        <!-- One-Time / On-Demand Interactive User Orientation Guide Button -->
+        <button id="btnOpenGuide" onclick="openOnboardingGuide()" class="flex items-center gap-1.5 bg-[#0f2d4a] hover:bg-[#163a5e] text-amber-300 hover:text-amber-200 border border-amber-500/40 px-3 py-1.5 rounded-xl font-bold transition shadow-2xs group" title="Open platform orientation walkthrough & feature guide">
+          <i data-lucide="help-circle" class="w-4 h-4 text-amber-400 group-hover:scale-110 transition"></i>
+          <span class="hidden md:inline">User Guide</span>
+        </button>
+
+        <!-- Sovereign AI Vision Status Pill -->
+        <div id="aiStatusPill" class="flex items-center gap-2 bg-[#092238] border border-emerald-500/40 px-3 py-1.5 rounded-xl shadow-xs" title="Sovereign Gemini 3.6 Multimodal Vision AI Model Active">
+          <span id="aiStatusDot" class="pulse-dot bg-emerald-400"></span>
+          <span id="aiStatusText" class="font-bold text-emerald-300 text-[11px] hidden sm:inline">Gemini 3.6 AI Vision • Online</span>
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-400"></i>
+        </div>
+
+        <!-- Dynamic User Profile Capsule (Govt Officer vs B2B Brand) -->
+        <div id="userProfileCapsule" onclick="openAuthModal()" class="flex items-center gap-2 bg-[#082238] border border-amber-500/40 hover:border-amber-400/80 px-3 py-1.5 rounded-xl cursor-pointer transition shadow-sm group select-none" title="Click to view credentials, switch role, or login">
+          <div id="userRoleIconContainer" class="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-105 transition">
+            <i id="userRoleIcon" data-lucide="shield-check" class="w-4 h-4"></i>
+          </div>
+          <div class="text-left">
+            <div class="flex items-center gap-1.5">
+              <p id="topBarUserName" class="font-bold text-slate-100 text-[11px] leading-tight">Shri Rajesh Kumar</p>
+              <span id="topBarRoleBadge" class="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-amber-500/25 text-amber-300 border border-amber-500/40">GOVT LMO</span>
+            </div>
+            <p id="topBarUserOrg" class="text-[10px] text-slate-400 leading-tight">Dept. of Consumer Affairs, Delhi Circle</p>
+          </div>
+          <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 text-slate-400 group-hover:text-amber-400 transition ml-1"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Consolidated 3-Tab Boxed Module Navigation Bar -->
+    <div class="border-t border-slate-700/80 bg-[#051626] py-2 px-2">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex overflow-x-auto gap-3 items-center">
+        <!-- Tab 1 Box: Inspection Station -->
+        <button class="nav-tab active" data-tab="inspection" onclick="switchTab('inspection')" title="Run statutory packaging compliance inspection">
+          <div class="tab-icon-box">
+            <i data-lucide="scan" class="w-4 h-4"></i>
+          </div>
+          <div class="text-left">
+            <div class="flex items-center gap-1.5">
+              <span class="tab-title">Packaging Inspection Station</span>
+              <span class="tab-badge">STATION</span>
+            </div>
+            <p class="tab-subtitle">Single-Scan Statutory Audit & Calipers</p>
+          </div>
+        </button>
+
+        <!-- Tab 2 Box: B2B Pre-Print Sandbox -->
+        <button class="nav-tab" data-tab="b2b" onclick="switchTab('b2b')" title="B2B industrial pre-print packaging dieline clearance">
+          <div class="tab-icon-box">
+            <i data-lucide="package-check" class="w-4 h-4"></i>
+          </div>
+          <div class="text-left">
+            <div class="flex items-center gap-1.5">
+              <span class="tab-title">B2B Pre-Print Sandbox</span>
+              <span class="tab-badge text-indigo-300 border-indigo-400/40 bg-indigo-500/20">STUDIO</span>
+            </div>
+            <p class="tab-subtitle">Artwork Clearance & ₹75k Protection</p>
+          </div>
+        </button>
+
+        <!-- Tab 3 Box: Dossier Vault -->
+        <button class="nav-tab" data-tab="vault" onclick="switchTab('vault')" title="Central repository of past audits and enforcement analytics">
+          <div class="tab-icon-box">
+            <i data-lucide="database" class="w-4 h-4"></i>
+          </div>
+          <div class="text-left">
+            <div class="flex items-center gap-1.5">
+              <span class="tab-title">Dossier Vault & Analytics</span>
+              <span class="tab-badge text-emerald-300 border-emerald-400/40 bg-emerald-500/20">RECORDS</span>
+            </div>
+            <p class="tab-subtitle">Central Vault & Seizure Reports</p>
+          </div>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Portal Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ==================================================================== -->
+    <!-- TAB 1: UNIFIED STATUTORY PACKAGING INSPECTION STATION -->
+    <!-- ==================================================================== -->
+    <section id="tab-inspection" class="tab-content space-y-6">
+      
+      <!-- Top Statutory Directive Banner -->
+      <div class="bg-gradient-to-r from-[#0A2540] via-[#13315C] to-[#0A2540] text-white rounded-xl p-4 shadow-md border border-slate-700/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 class="text-sm sm:text-base font-extrabold flex items-center gap-2 text-white flex-wrap">
+            <i data-lucide="shield-alert" class="w-5 h-5 text-amber-400"></i>
+            <span>Statutory Field Inspection & Automated Label Audit Station</span>
+            <span id="stationRoleBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Official Enforcement Station</span>
+          </h2>
+          <p class="text-xs text-slate-300 mt-0.5">
+            Unified Single-Scan: Automated 3D Surface De-Warping, Sub-mm Scale Calibration, On-Pack QR Harmonization & Rule Verification.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-300 font-medium">Standard Reference Pack:</span>
+          <button onclick="loadDemoBenchmark('MasalaChips')" class="text-xs bg-slate-800/90 hover:bg-slate-700 text-emerald-300 px-2.5 py-1 rounded border border-emerald-500/50 transition font-semibold flex items-center gap-1.5 shadow-xs">
+            <i data-lucide="package-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+            Standard A (Flexible Pouch)
+          </button>
+          <button onclick="loadDemoBenchmark('BiscuitsViolation')" class="text-xs bg-slate-800/90 hover:bg-slate-700 text-rose-300 px-2.5 py-1 rounded border border-rose-500/50 transition font-semibold flex items-center gap-1.5 shadow-xs">
+            <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-rose-400"></i>
+            Standard B (Rigid Carton)
+          </button>
+        </div>
+      </div>
+
+      <!-- 2-Column Unified Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Acquisition & Parameters (5 Cols) -->
+        <div class="lg:col-span-5 space-y-5">
+          
+          <!-- Image Acquisition Card -->
+          <div class="glass-panel-gov rounded-xl p-5 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+              <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i data-lucide="camera" class="w-4 h-4 text-blue-700"></i>
+                1. Packaging Photograph Capture
+              </h3>
+              <div class="flex bg-slate-200/80 p-1 rounded-lg text-xs font-semibold">
+                <button id="btnModeUpload" onclick="setInputMode('upload')" class="px-2.5 py-1 rounded-md bg-white shadow-sm text-blue-800">File Upload</button>
+                <button id="btnModeCamera" onclick="setInputMode('camera')" class="px-2.5 py-1 rounded-md text-slate-700 hover:text-slate-900">Live Camera</button>
+              </div>
+            </div>
+
+            <!-- Upload Dropzone -->
+            <div id="containerUpload" class="space-y-3">
+              <div id="dropzone" class="dropzone rounded-xl p-6 text-center cursor-pointer bg-slate-50 hover:bg-blue-50/50 transition">
+                <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelected(event)">
+                <i data-lucide="upload-cloud" class="w-10 h-10 mx-auto text-blue-600 mb-2"></i>
+                <p class="text-sm font-bold text-slate-800">Select or Drag Packaging Photo</p>
+                <p class="text-xs text-slate-500 mt-1">Supports High-Resolution JPG, PNG, WEBP</p>
+              </div>
+            </div>
+
+            <!-- Live Camera Viewport -->
+            <div id="containerCamera" class="hidden space-y-3">
+              <div class="relative rounded-xl overflow-hidden bg-black aspect-video flex items-center justify-center">
+                <video id="cameraVideo" autoplay playsinline class="camera-view"></video>
+                <div class="absolute inset-0 border-2 border-dashed border-amber-400/50 pointer-events-none rounded-xl m-4 flex items-center justify-center">
+                  <span class="text-xs bg-black/70 text-amber-300 font-semibold px-2.5 py-1 rounded">Position Label & Reference Object in Frame</span>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <button id="btnStartCam" onclick="startCamera()" class="flex-1 text-xs py-2 bg-slate-800 text-white font-semibold rounded-lg hover:bg-slate-750 flex items-center justify-center gap-1.5">
+                  <i data-lucide="video" class="w-3.5 h-3.5"></i> Start Camera
+                </button>
+                <button id="btnSnapCam" onclick="captureCamera()" class="flex-1 text-xs py-2 bg-blue-700 text-white font-semibold rounded-lg hover:bg-blue-800 flex items-center justify-center gap-1.5 shadow-sm">
+                  <i data-lucide="camera" class="w-3.5 h-3.5"></i> Capture Frame
+                </button>
+              </div>
+            </div>
+
+            <!-- Image Thumbnail Preview & Resolution -->
+            <div id="previewCard" class="hidden border border-slate-200 rounded-lg p-3 bg-slate-50 flex items-center gap-3">
+              <img id="imageThumb" src="" alt="Thumbnail" class="w-16 h-16 object-cover rounded-md border border-slate-300">
+              <div class="flex-1 min-w-0">
+                <p id="imageFilename" class="text-xs font-bold text-slate-800 truncate">selected_image.jpg</p>
+                <p id="imageResolution" class="text-xs text-slate-500">Ready for statutory inspection</p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span id="readabilityBadge" class="metric-badge bg-emerald-100 text-emerald-800">Contrast: Normal</span>
+                </div>
+              </div>
+              <button onclick="clearSelectedImage()" class="text-slate-400 hover:text-rose-600 p-1">
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Calibration & Engine Parameters Card -->
+          <!-- Autonomous AI Vision & Scale Intelligence Hub -->
+          <div class="glass-panel-gov rounded-xl p-5 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+              <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i data-lucide="cpu" class="w-4 h-4 text-blue-700"></i>
+                2. Autonomous AI Vision & Metric Scale Intelligence
+              </h3>
+              <span class="text-[10px] font-extrabold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Fully Autonomous
+              </span>
+            </div>
+
+            <!-- Autonomous Vision & Scale Telemetry Bar -->
+            <div class="grid grid-cols-3 gap-2.5 py-1">
+              <div class="bg-indigo-50/70 border border-indigo-200/80 rounded-xl p-2.5 text-center transition hover:bg-indigo-50">
+                <div class="w-7 h-7 rounded-lg bg-indigo-600/10 text-indigo-700 flex items-center justify-center mx-auto mb-1">
+                  <i data-lucide="crosshair" class="w-4 h-4"></i>
+                </div>
+                <p class="text-[11px] font-bold text-slate-900">Auto Scale</p>
+                <p class="text-[9px] text-indigo-700 font-semibold mt-0.5">Card / Coin / Priors</p>
+              </div>
+
+              <div class="bg-amber-50/70 border border-amber-200/80 rounded-xl p-2.5 text-center transition hover:bg-amber-50">
+                <div class="w-7 h-7 rounded-lg bg-amber-600/10 text-amber-700 flex items-center justify-center mx-auto mb-1">
+                  <i data-lucide="sparkles" class="w-4 h-4"></i>
+                </div>
+                <p class="text-[11px] font-bold text-slate-900">Gemini 3.6 AI</p>
+                <p class="text-[9px] text-amber-700 font-semibold mt-0.5">Spatial Grounded</p>
+              </div>
+
+              <div class="bg-violet-50/70 border border-violet-200/80 rounded-xl p-2.5 text-center transition hover:bg-violet-50">
+                <div class="w-7 h-7 rounded-lg bg-violet-600/10 text-violet-700 flex items-center justify-center mx-auto mb-1">
+                  <i data-lucide="qr-code" class="w-4 h-4"></i>
+                </div>
+                <p class="text-[11px] font-bold text-slate-900">QR Disclosure</p>
+                <p class="text-[9px] text-violet-700 font-semibold mt-0.5">Auto-Harmonized</p>
+              </div>
+            </div>
+
+            <!-- Hidden input for reference package verification payloads -->
+            <input type="hidden" id="inputQrPayload" value="">
+
+            <!-- Action Controls: Execute, Save Dossier, Reset Station -->
+            <div class="space-y-2 pt-2 border-t border-slate-200">
+              <button id="btnRunAudit" onclick="executeAudit()" class="w-full py-3 bg-[#0A2540] hover:bg-[#13315C] text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-lg shadow-blue-950/20 flex items-center justify-center gap-2 transition transform active:scale-98 border border-amber-400/40">
+                <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
+                <span>EXECUTE STATUTORY COMPLIANCE AUDIT</span>
+              </button>
+
+              <div class="grid grid-cols-2 gap-2">
+                <button id="btnSaveAudit" onclick="saveCurrentAuditToVault()" class="py-2.5 px-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition active:scale-98 border border-emerald-500/40" title="Save this audit report to Central Vault">
+                  <i data-lucide="save" class="w-3.5 h-3.5 text-emerald-200"></i>
+                  <span>Save Dossier</span>
+                </button>
+                <button id="btnResetAll" onclick="resetFullStation()" class="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 font-bold text-xs rounded-xl shadow-2xs flex items-center justify-center gap-1.5 transition active:scale-98 border border-slate-300" title="Clear image and reset inspection station">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-slate-500"></i>
+                  <span>Reset Station</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Visual Grounding, Diagnostics & Findings (7 Cols) -->
+        <div class="lg:col-span-7 space-y-5">
+
+          <!-- Pixel-Accurate Packaging Canvas Overlay -->
+          <div class="glass-panel-gov rounded-xl p-5 space-y-3">
+            <div class="flex flex-wrap justify-between items-center border-b border-slate-200 pb-3 gap-2">
+              <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i data-lucide="scan-face" class="w-4 h-4 text-blue-700"></i>
+                Interactive Spatial Inspection Canvas
+              </h3>
+              <div class="flex flex-wrap items-center gap-2 text-[11px]">
+                <span class="inline-flex items-center gap-1 font-semibold text-blue-700">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-blue-600 inline-block"></span> PDP
+                </span>
+                <span class="inline-flex items-center gap-1 font-semibold text-emerald-700">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-emerald-500 inline-block"></span> Compliant
+                </span>
+                <span class="inline-flex items-center gap-1 font-semibold text-rose-700">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-rose-500 inline-block"></span> Violation
+                </span>
+                <span class="inline-flex items-center gap-1 font-semibold text-amber-700">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-amber-500 inline-block"></span> Caliper Ruler
+                </span>
+              </div>
+            </div>
+
+            <!-- Interactive Viewer Toolbar -->
+            <div id="viewerToolbar" class="flex flex-wrap items-center justify-between gap-2 bg-slate-900/90 p-2 rounded-lg text-xs text-white border border-slate-700/60">
+              <!-- Mode Toggle -->
+              <div class="inline-flex rounded-md p-0.5 bg-slate-800 border border-slate-700 text-[11px]">
+                <button id="btnModeAnnotated" onclick="setViewMode('annotated')" class="px-2.5 py-1 rounded font-bold bg-blue-600 text-white shadow transition flex items-center gap-1">
+                  <i data-lucide="scan" class="w-3 h-3"></i> Annotated
+                </button>
+                <button id="btnModeOriginal" onclick="setViewMode('original')" class="px-2.5 py-1 rounded font-bold text-slate-400 hover:text-white transition flex items-center gap-1">
+                  <i data-lucide="image" class="w-3 h-3"></i> Original
+                </button>
+                <button id="btnModeSplit" onclick="setViewMode('split')" class="px-2.5 py-1 rounded font-bold text-slate-400 hover:text-white transition flex items-center gap-1">
+                  <i data-lucide="columns-2" class="w-3 h-3"></i> Split View
+                </button>
+                <button id="btnMode3D" onclick="setViewMode('3d')" class="px-2.5 py-1 rounded font-bold text-amber-300 hover:text-amber-200 bg-amber-950/40 border border-amber-500/40 transition flex items-center gap-1 shadow-sm">
+                  <i data-lucide="box" class="w-3 h-3 text-amber-400"></i> 🌐 3D Twin & X-Ray
+                </button>
+              </div>
+
+              <!-- Layer Filters -->
+              <div class="flex items-center gap-1">
+                <span class="text-[10px] text-slate-400 font-bold uppercase mr-1">Filter:</span>
+                <button id="filterAll" onclick="setLayerFilter('all')" class="layer-chip active text-[10px] px-2 py-0.5 rounded-full border border-blue-500 bg-blue-900/60 text-blue-200 font-semibold">
+                  All
+                </button>
+                <button id="filterCompliant" onclick="setLayerFilter('compliant')" class="layer-chip text-[10px] px-2 py-0.5 rounded-full border border-slate-700 hover:border-emerald-500 bg-slate-800 text-slate-300 font-semibold">
+                  Compliant
+                </button>
+                <button id="filterViolations" onclick="setLayerFilter('violations')" class="layer-chip text-[10px] px-2 py-0.5 rounded-full border border-slate-700 hover:border-rose-500 bg-slate-800 text-slate-300 font-semibold">
+                  Violations
+                </button>
+              </div>
+
+              <!-- Tools & Zoom Controls -->
+              <div class="flex items-center gap-1.5">
+                <button id="btnToggleCaliper" onclick="toggleVirtualCaliper()" title="Toggle High-Precision Digital Vernier Caliper" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-[11px] font-bold flex items-center gap-1">
+                  <i data-lucide="ruler" class="w-3.5 h-3.5 text-emerald-400"></i> 📏 Vernier Caliper
+                </button>
+                <div class="h-4 w-px bg-slate-700 mx-0.5"></div>
+                <button onclick="zoomCanvas(1.2)" title="Zoom In" class="viewer-btn p-1 rounded bg-slate-800 text-slate-300 hover:text-white">
+                  <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="zoomCanvas(0.8)" title="Zoom Out" class="viewer-btn p-1 rounded bg-slate-800 text-slate-300 hover:text-white">
+                  <i data-lucide="zoom-out" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="resetCanvasZoom()" title="Reset Fit" class="viewer-btn p-1 rounded bg-slate-800 text-slate-300 hover:text-white">
+                  <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Canvas Viewport with SVG Overlay -->
+            <div id="canvasContainer" class="relative rounded-xl overflow-hidden bg-slate-950 aspect-video flex items-center justify-center border border-slate-300 select-none">
+              
+              <!-- Standard Single View -->
+              <div id="canvasViewport" class="relative w-full h-full flex items-center justify-center">
+                <img id="annotatedResultImg" src="" alt="Packaging Inspection View" class="hidden max-h-full max-w-full object-contain pointer-events-none transition-transform duration-150">
+                <img id="originalResultImg" src="" alt="Raw Packaging View" class="hidden max-h-full max-w-full object-contain pointer-events-none transition-transform duration-150">
+                
+                <!-- Interactive Dynamic SVG Overlay for High-Precision Hover and Clicks -->
+                <svg id="interactiveSvgOverlay" class="hidden absolute inset-0 w-full h-full pointer-events-auto" preserveAspectRatio="none">
+                  <!-- Injected via app.js -->
+                </svg>
+
+                <!-- Floating Inspector Tooltip Popover -->
+                <div id="boxInspectorTooltip" class="hidden absolute z-30 pointer-events-none bg-slate-950/95 backdrop-blur-md text-white text-xs rounded-lg p-2.5 shadow-2xl border border-slate-700 min-w-[200px] max-w-[280px]">
+                  <!-- Injected dynamically -->
+                </div>
+
+                <!-- Interactive High-Precision Digital Vernier Caliper Overlay -->
+                <div id="virtualCaliperOverlay" class="hidden absolute z-30 pointer-events-auto select-none" style="top: 25px; left: 25px;">
+                  <div id="caliperBody" class="relative bg-gradient-to-r from-slate-300 via-slate-100 to-slate-300 text-slate-900 rounded-lg shadow-2xl border-2 border-slate-400 p-2.5 cursor-move flex flex-col gap-1.5 w-72 backdrop-blur-sm">
+                    <!-- Stainless Steel Header & Graduation Marks -->
+                    <div class="flex items-center justify-between border-b border-slate-400 pb-1">
+                      <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-ping"></span>
+                        <span class="text-[9px] font-mono font-extrabold uppercase text-slate-800 tracking-wider">STATUTORY DIGITAL CALIPER • 0.01mm</span>
+                      </div>
+                      <button onclick="toggleVirtualCaliper(false)" class="text-slate-500 hover:text-slate-900 text-sm font-black leading-none px-1">&times;</button>
+                    </div>
+
+                    <!-- Backlit Green Digital LCD Readout -->
+                    <div class="flex items-center justify-between bg-[#0e2115] border-2 border-slate-600 rounded px-3 py-1.5 text-emerald-400 shadow-inner">
+                      <span class="font-mono text-xl font-black tracking-widest" id="caliperLcdReading">03.82</span>
+                      <span class="font-mono text-xs font-extrabold">mm</span>
+                    </div>
+
+                    <!-- Real-time Schedule II Statutory Check -->
+                    <div class="flex items-center justify-between text-[10px] font-bold px-1">
+                      <span class="text-slate-700">Schedule II Min: <span id="caliperMinReq" class="font-mono">2.0 mm</span></span>
+                      <span id="caliperStatusBadge" class="text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300 font-extrabold">PASS</span>
+                    </div>
+
+                    <!-- Draggable Measuring Jaws Visual -->
+                    <div class="relative h-14 bg-slate-200 rounded border border-slate-400 overflow-hidden mt-0.5 select-none" id="caliperTrackArea">
+                      <!-- Fixed Upper Jaw -->
+                      <div class="absolute left-4 top-0 bottom-0 w-2.5 bg-gradient-to-b from-slate-500 to-slate-700 border-r border-slate-800"></div>
+                      <!-- Movable Measuring Jaw -->
+                      <div id="caliperMovableJaw" class="absolute top-0 bottom-0 w-3 bg-gradient-to-b from-amber-500 to-amber-700 border-r border-amber-900 cursor-ew-resize shadow-lg flex items-center justify-center" style="left: 70px;">
+                        <div class="w-1 h-6 bg-amber-200 rounded-sm"></div>
+                      </div>
+                      <div class="absolute bottom-0 inset-x-0 h-3 bg-slate-300 flex justify-between px-4 text-[8px] font-mono text-slate-700 border-t border-slate-400">
+                        <span>0</span><span>5</span><span>10</span><span>15</span><span>20</span><span>25mm</span>
+                      </div>
+                    </div>
+
+                    <div class="text-[8px] text-slate-500 text-center font-mono">
+                      🖱️ Drag header to move • Drag amber jaw horizontally to measure
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Side-by-Side Split View Container -->
+              <div id="splitViewContainer" class="hidden w-full h-full p-2 split-view-container">
+                <div class="relative bg-slate-900 rounded-lg overflow-hidden flex flex-col items-center justify-center border border-slate-800">
+                  <span class="absolute top-2 left-2 z-10 text-[10px] bg-slate-950/80 text-slate-300 px-2 py-0.5 rounded font-bold border border-slate-700">Raw Capture</span>
+                  <img id="splitOriginalImg" src="" alt="Raw Capture" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="relative bg-slate-900 rounded-lg overflow-hidden flex flex-col items-center justify-center border border-slate-800">
+                  <span class="absolute top-2 left-2 z-10 text-[10px] bg-slate-950/80 text-emerald-300 px-2 py-0.5 rounded font-bold border border-emerald-700">Statutory Overlay</span>
+                  <img id="splitAnnotatedImg" src="" alt="Annotated Scan" class="max-h-full max-w-full object-contain">
+                </div>
+              </div>
+
+              <!-- World-First 3D Neural Metrology Twin & Forensic X-Ray Viewport -->
+              <div id="threejsViewport" class="hidden relative w-full h-full bg-gradient-to-b from-[#060d17] via-[#0b1728] to-[#040810] flex flex-col items-center justify-center overflow-hidden">
+                <!-- Three.js Canvas -->
+                <canvas id="threeCanvas" class="w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+
+                <!-- Floating 3D Twin HUD Header -->
+                <div class="absolute top-2 left-2 right-2 flex flex-wrap items-center justify-between gap-2 pointer-events-none z-20">
+                  <div class="flex items-center gap-1.5 bg-slate-950/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-cyan-500/50 pointer-events-auto shadow-xl">
+                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse inline-block"></span>
+                    <span class="text-[11px] font-extrabold text-cyan-300 uppercase tracking-wider">3D Digital Packaging Twin</span>
+                    <span class="text-[9px] font-mono text-slate-400">| WebGL 60FPS</span>
+                  </div>
+
+                  <!-- Container 3D Geometry Selector -->
+                  <div class="flex items-center gap-1 bg-slate-950/85 backdrop-blur-md p-1 rounded-lg border border-slate-700 pointer-events-auto text-[10px]">
+                    <span class="text-slate-400 px-1 font-bold">Geometry:</span>
+                    <button onclick="setThreeGeometry('carton')" id="geoBtnCarton" class="geo-btn active px-2.5 py-0.5 rounded font-bold bg-blue-600 text-white">Carton</button>
+                    <button onclick="setThreeGeometry('can')" id="geoBtnCan" class="geo-btn px-2.5 py-0.5 rounded font-bold text-slate-400 hover:text-white">Can/Tin</button>
+                    <button onclick="setThreeGeometry('bottle')" id="geoBtnBottle" class="geo-btn px-2.5 py-0.5 rounded font-bold text-slate-400 hover:text-white">Bottle</button>
+                    <button onclick="setThreeGeometry('pouch')" id="geoBtnPouch" class="geo-btn px-2.5 py-0.5 rounded font-bold text-slate-400 hover:text-white">Pouch</button>
+                  </div>
+
+                  <!-- 3D Laser Calipers Toggle -->
+                  <div class="flex items-center gap-2 bg-slate-950/85 backdrop-blur-md px-2.5 py-1 rounded-lg border border-emerald-500/40 pointer-events-auto">
+                    <label class="flex items-center gap-1.5 cursor-pointer text-[10px] font-bold text-emerald-300">
+                      <input type="checkbox" id="chk3dLasers" checked onchange="toggle3dLasers(this.checked)" class="rounded text-emerald-500">
+                      <span>3D Laser Calipers</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Floating 3D Forensic X-Ray & Deceptive Slack-Fill Bottom HUD -->
+                <div class="absolute bottom-2 left-2 right-2 flex flex-col gap-1.5 pointer-events-none z-20">
+                  <!-- Volumetric & Slack-Fill Alert Banner -->
+                  <div id="threejsVolumetricBanner" class="bg-slate-950/90 backdrop-blur-md p-2.5 rounded-lg border border-slate-700 pointer-events-auto flex flex-wrap items-center justify-between gap-3 text-xs shadow-2xl">
+                    <div class="flex items-center gap-3">
+                      <div class="p-1.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-400">
+                        <i data-lucide="flask-conical" class="w-4 h-4"></i>
+                      </div>
+                      <div>
+                        <div class="flex items-center gap-2">
+                          <span class="font-extrabold text-slate-100 text-[11px]" id="volumetricTitle">Forensic Volumetric Slack-Fill Auditor</span>
+                          <span id="volumetricBadge" class="text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase bg-emerald-900 text-emerald-300 border border-emerald-500/40">COMPLIANT</span>
+                        </div>
+                        <div class="text-[10px] text-slate-400 font-mono" id="volumetricMetrics">
+                          Capacity: 480 cm³ | Fill: 310 ml (64.6%) | Headspace Void: 35.4%
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- X-Ray Translucency Slider -->
+                    <div class="flex items-center gap-2 min-w-[220px] flex-1 justify-end">
+                      <span class="text-[10px] font-bold text-amber-300 uppercase flex items-center gap-1">
+                        <i data-lucide="eye" class="w-3 h-3 text-amber-400"></i> 3D X-Ray Fill:
+                      </span>
+                      <input type="range" id="xraySlider" min="0" max="100" value="0" oninput="onXraySliderChange(this.value)" class="w-32 accent-amber-400 cursor-pointer h-1.5 bg-slate-700 rounded-lg">
+                      <span id="xrayPctLabel" class="text-[10px] font-mono text-amber-300 font-bold w-8 text-right">0%</span>
+                    </div>
+                  </div>
+
+                  <!-- Orbit Instructions -->
+                  <div class="text-center text-[9px] font-mono text-slate-400/80 bg-slate-950/70 py-0.5 rounded border border-slate-800">
+                    🖱️ Left-click + Drag to rotate 360° • Scroll to zoom • Right-click to pan
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty State Placeholder -->
+              <div id="canvasEmptyPlaceholder" class="text-center p-8 text-slate-400">
+                <i data-lucide="scan-line" class="w-12 h-12 mx-auto text-slate-600 mb-2"></i>
+                <p class="text-sm font-bold text-slate-300">Awaiting Packaging Photograph</p>
+                <p class="text-xs text-slate-500 mt-1">Upload a photo or select a benchmark sample to run statutory inspection</p>
+              </div>
+
+              <!-- Loading Overlay -->
+              <div id="auditSpinner" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-sm flex flex-col items-center justify-center text-white space-y-3 z-40">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-400"></div>
+                <p class="text-sm font-extrabold tracking-wide">Executing Unified Statutory Pipeline...</p>
+                <p class="text-xs text-slate-300">Dual-Engine AI Vision • Sub-mm Calibration • QR Harmonization • Rule Verification</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Audit Scorecard & Findings Card (Visible after audit) -->
+          <div id="auditResultCard" class="hidden space-y-5">
+            
+            <!-- Official Verdict Banner -->
+            <div id="verdictBanner" class="rounded-xl p-5 border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span id="verdictBadge" class="text-xs sm:text-sm font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">COMPLIANT</span>
+                  <span id="verdictRefId" class="text-xs font-mono text-slate-600 font-bold">LM-INSP-2026</span>
+                </div>
+                <p id="verdictSubtitle" class="text-xs text-slate-700">Product fully adheres to Legal Metrology (Packaged Commodities) Rules, 2011.</p>
+              </div>
+              <div class="text-right flex items-center gap-4">
+                <div class="text-center">
+                  <div id="scoreValue" class="text-3xl font-extrabold text-emerald-700">100%</div>
+                  <div class="text-[11px] font-bold text-slate-600">Compliance Score</div>
+                </div>
+                <!-- PDF Download Button -->
+                <button id="btnDownloadPdf" onclick="downloadOfficialPdf()" class="px-4 py-2.5 bg-[#0A2540] hover:bg-[#13315C] text-white text-xs font-bold rounded-lg shadow flex items-center gap-1.5 transition border border-amber-400/40">
+                  <i data-lucide="file-down" class="w-4 h-4 text-amber-400"></i>
+                  <span>Download Geotagged PDF</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Streamlined 4-Card Executive Diagnostics & Physical Measurement Strip -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs">
+              <!-- Card 1: Schedule II Numeral Caliper Measurement -->
+              <div class="bg-white p-3.5 rounded-xl border border-slate-200/90 flex flex-col justify-between shadow-2xs space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <i data-lucide="ruler" class="w-3.5 h-3.5 text-indigo-600"></i> Schedule II Caliper
+                  </span>
+                  <span id="metricFontThreshold" class="text-[10px] text-emerald-700 font-extrabold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">Min: 4.0 mm</span>
+                </div>
+                <div>
+                  <p id="metricFontHeight" class="text-xl font-extrabold text-slate-900 leading-none">4.2 mm</p>
+                  <p class="text-[10px] text-slate-500 mt-1">Rule 9 Net Qty Numeral Height</p>
+                </div>
+              </div>
+
+              <!-- Card 2: Physical PDP Area & Surface Geometry -->
+              <div class="bg-white p-3.5 rounded-xl border border-slate-200/90 flex flex-col justify-between shadow-2xs space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <i data-lucide="cylinder" class="w-3.5 h-3.5 text-blue-600"></i> PDP Surface
+                  </span>
+                  <span id="diagSurfaceGeometry" class="text-[10px] text-blue-700 font-extrabold bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200">Planar Surface</span>
+                </div>
+                <div>
+                  <p id="metricPdpArea" class="text-xl font-extrabold text-slate-900 leading-none">216.0 cm²</p>
+                  <p class="text-[10px] text-slate-500 mt-1">Principal Display Panel Area</p>
+                </div>
+              </div>
+
+              <!-- Card 3: Optical Scale Calibration (PPM) -->
+              <div class="bg-white p-3.5 rounded-xl border border-slate-200/90 flex flex-col justify-between shadow-2xs space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <i data-lucide="crosshair" class="w-3.5 h-3.5 text-amber-600"></i> Scale Calibration
+                  </span>
+                  <span id="metricRefObject" class="text-[10px] text-amber-800 font-extrabold bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">Card Calibrated</span>
+                </div>
+                <div>
+                  <p id="metricPpm" class="text-xl font-extrabold text-slate-900 leading-none">3.45 px/mm</p>
+                  <p id="diagScalePpm" class="text-[10px] text-slate-500 mt-1">Sub-mm Optical Metric Standard</p>
+                </div>
+              </div>
+
+              <!-- Card 4: On-Pack QR Digital Harmonization -->
+              <div class="bg-white p-3.5 rounded-xl border border-slate-200/90 flex flex-col justify-between shadow-2xs space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <i data-lucide="qr-code" class="w-3.5 h-3.5 text-violet-600"></i> QR Disclosure
+                  </span>
+                  <span id="diagQrStatus" class="text-[10px] text-violet-700 font-extrabold bg-violet-50 px-1.5 py-0.2 rounded border border-violet-200">No QR Detected</span>
+                </div>
+                <div>
+                  <p id="diagQrSub" class="text-xs font-bold text-slate-800 mt-0.5 truncate">Digital E-Label Audit</p>
+                  <p id="metricEngineUsed" class="text-[10px] text-slate-500 mt-1 truncate">Gemini Vision AI Grounded</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Declarations Summary Table -->
+            <div class="glass-panel-gov rounded-xl p-5 space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+                <div>
+                  <h4 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                    <i data-lucide="layers" class="w-4 h-4 text-blue-700"></i>
+                    <span>Mandatory Statutory Declarations Matrix</span>
+                  </h4>
+                  <p class="text-[11px] text-slate-500">Hover or click any declaration to spotlight its physical location on the packaging.</p>
+                </div>
+                <span class="text-xs text-blue-700 font-bold bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">Rule 6 Disclosures</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs" id="declarationsMatrixGrid">
+                <!-- Row: Product Name -->
+                <div id="row-product_name" class="declaration-row bg-slate-50 p-3 rounded-lg border border-slate-200 flex justify-between items-center group" onmouseenter="spotlightBox('product_name')" onmouseleave="clearSpotlightBox()">
+                  <div class="min-w-0 flex-1 pr-2">
+                    <span class="text-[11px] text-slate-500 font-bold block uppercase flex items-center gap-1">
+                      <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span> Product / Brand (Rule 6(1)(f))
+                    </span>
+                    <span id="decProductName" class="font-extrabold text-slate-900 text-sm block truncate mt-0.5">-</span>
+                  </div>
+                  <button onclick="spotlightAndZoom('product_name')" class="opacity-70 group-hover:opacity-100 p-1.5 rounded-md hover:bg-blue-100 text-blue-600 transition" title="Spotlight Box">
+                    <i data-lucide="crosshair" class="w-4 h-4"></i>
+                  </button>
+                </div>
+
+                <!-- Row: Maximum Retail Price -->
+                <div id="row-mrp" class="declaration-row bg-slate-50 p-3 rounded-lg border border-slate-200 flex justify-between items-center group" onmouseenter="spotlightBox('mrp')" onmouseleave="clearSpotlightBox()">
+                  <div class="min-w-0 flex-1 pr-2">
+                    <span class="text-[11px] text-slate-500 font-bold block uppercase flex items-center gap-1">
+                      <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Maximum Retail Price (Rule 6(1)(c))
+                    </span>
+                    <span id="decMrp" class="font-extrabold text-slate-900 text-sm block truncate mt-0.5">-</span>
+                  </div>
+                  <button onclick="spotlightAndZoom('mrp')" class="opacity-70 group-hover:opacity-100 p-1.5 rounded-md hover:bg-blue-100 text-blue-600 transition" title="Spotlight Box">
+                    <i data-lucide="crosshair" class="w-4 h-4"></i>
+                  </button>
+                </div>
+
+                <!-- Row: Net Quantity -->
+                <div id="row-net_quantity" class="declaration-row bg-slate-50 p-3 rounded-lg border border-slate-200 flex justify-between items-center group" onmouseenter="spotlightBox('net_quantity')" onmouseleave="clearSpotlightBox()">
+                  <div class="min-w-0 flex-1 pr-2">
+                    <span class="text-[11px] text-slate-500 font-bold block uppercase flex items-center gap-1">
+                      <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Net Quantity (Rule 6(1)(b))
+                    </span>
+                    <span id="decNetQty" class="font-extrabold text-slate-900 text-sm block truncate mt-0.5">-</span>
+                  </div>
+                  <button onclick="spotlightAndZoom('net_quantity')" class="opacity-70 group-hover:opacity-100 p-1.5 rounded-md hover:bg-blue-100 text-blue-600 transition" title="Spotlight Box">
+                    <i data-lucide="crosshair" class="w-4 h-4"></i>
+                  </button>
+                </div>
+
+                <!-- Row: Unit Sale Price -->
+                <div id="row-usp" class="declaration-row bg-slate-50 p-3 rounded-lg border border-slate-200 flex justify-between items-center group" onmouseenter="spotlightBox('usp')" onmouseleave="clearSpotlightBox()">
+                  <div class="min-w-0 flex-1 pr-2">
+                    <span class="text-[11px] text-slate-500 font-bold block uppercase flex items-center gap-1">
+                      <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span> Unit Sale Price (Rule 6(1)(e))
+                    </span>
+                    <span id="decUsp" class="font-extrabold text-slate-900 text-sm block truncate mt-0.5">-</span>
+                  </div>
+                  <button onclick="spotlightAndZoom('usp')" class="opacity-70 group-hover:opacity-100 p-1.5 rounded-md hover:bg-blue-100 text-blue-600 transition" title="Spotlight Box">
+                    <i data-lucide="crosshair" class="w-4 h-4"></i>
+                  </button>
+                </div>
+
+                <!-- Row: Date of Mfg / Packing -->
+                <div id="row-mfg_date" class="declaration-row bg-slate-50 p-3 rounded-lg border border-slate-200 flex justify-between items-center group" onmouseenter="spotlightBox('mfg_date')" onmouseleave="clearSpotlightBox()">
+                  <div class="min-w-0 flex-1 pr-2">
+                    <span class="text-[11px] text-slate-500 font-bold block uppercase flex items-center gap-1">
+                      <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Mfg / Pkd Date (Rule 6(1)(d))
+                    </span>
+                    <span id="decMfgDate" class="font-extrabold text-slate-900 text-sm block truncate mt-0.5">-</span>
+                  </div>
+                  <button onclick="spotlightAndZoom('mfg_date')" class="opacity-70 group-hover:opacity-100 p-1.5 rounded-md hover:bg-blue-100 text-blue-600 transition" title="Spotlight Box">
+                    <i data-lucide="crosshair" class="w-4 h-4"></i>
+                  </button>
+                </div>
+
+                <!-- Row: Manufacturer / Packer -->
+                <div id="row-manufacturer" class="declaration-row bg-slate-50 p-3 rounded-lg border border-slate-200 flex justify-between items-center group" onmouseenter="spotlightBox('manufacturer')" onmouseleave="clearSpotlightBox()">
+                  <div class="min-w-0 flex-1 pr-2">
+                    <span class="text-[11px] text-slate-500 font-bold block uppercase flex items-center gap-1">
+                      <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span> Manufacturer Details (Rule 6(1)(a))
+                    </span>
+                    <span id="decMfg" class="font-extrabold text-slate-900 text-sm block truncate mt-0.5">-</span>
+                  </div>
+                  <button onclick="spotlightAndZoom('manufacturer')" class="opacity-70 group-hover:opacity-100 p-1.5 rounded-md hover:bg-blue-100 text-blue-600 transition" title="Spotlight Box">
+                    <i data-lucide="crosshair" class="w-4 h-4"></i>
+                  </button>
+                </div>
+
+                <!-- Row: Consumer Helpline & Email -->
+                <div id="row-consumer_care" class="declaration-row sm:col-span-2 bg-slate-50 p-3 rounded-lg border border-slate-200 flex justify-between items-center group" onmouseenter="spotlightBox('consumer_care')" onmouseleave="clearSpotlightBox()">
+                  <div class="min-w-0 flex-1 pr-2">
+                    <span class="text-[11px] text-slate-500 font-bold block uppercase flex items-center gap-1">
+                      <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span> Consumer Care Helpline & Email (Rule 6(1)(n))
+                    </span>
+                    <span id="decConsumerCare" class="font-extrabold text-slate-900 text-sm block truncate mt-0.5">-</span>
+                  </div>
+                  <button onclick="spotlightAndZoom('consumer_care')" class="opacity-70 group-hover:opacity-100 p-1.5 rounded-md hover:bg-blue-100 text-blue-600 transition" title="Spotlight Box">
+                    <i data-lucide="crosshair" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Flagged Violations Accordion -->
+            <div id="violationsContainer" class="glass-panel-gov rounded-xl p-5 space-y-3">
+              <h4 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider flex items-center justify-between">
+                <span>Statutory Findings & Violations</span>
+                <span id="violationsCountBadge" class="bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full text-xs">0 Flagged</span>
+              </h4>
+              <div id="violationsList" class="space-y-2">
+                <!-- Dynamically populated violations -->
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ==================================================================== -->
+    <!-- TAB 2: B2B PRE-PRINT SANDBOX -->
+    <!-- ==================================================================== -->
+    <section id="tab-b2b" class="tab-content hidden space-y-6">
+      
+      <!-- Top B2B Industrial Directive Banner -->
+      <div class="bg-gradient-to-r from-[#0A2540] via-[#13315C] to-[#0A2540] text-white rounded-xl p-4 shadow-md border border-slate-700/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 class="text-sm sm:text-base font-extrabold flex items-center gap-2 text-white">
+            <i data-lucide="package-check" class="w-5 h-5 text-amber-400"></i>
+            B2B Industrial Pre-Print Artwork & Dieline Clearance Studio
+          </h2>
+          <p class="text-xs text-slate-300 mt-0.5">
+            Pre-flight compliance testing for FMCG brand managers, prepress agencies, and packaging converters before cylinder engraving & mass production.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="loadB2BSampleArtwork()" class="text-xs bg-blue-900/80 hover:bg-blue-800 text-white px-3 py-1.5 rounded-lg border border-blue-600 transition font-bold flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="file-image" class="w-3.5 h-3.5 text-blue-300"></i>
+            <span>Load Sample Dieline Artwork</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2-Column B2B Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Artwork Upload & Engineering Specifications (5 Cols) -->
+        <div class="lg:col-span-5 space-y-5">
+          
+          <!-- Artwork / Dieline Upload Card -->
+          <div class="glass-panel-gov rounded-xl p-5 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+              <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i data-lucide="upload-cloud" class="w-4 h-4 text-blue-700"></i>
+                1. Product Artwork / Dieline Image Upload
+              </h3>
+              <span class="text-[10px] text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded border border-blue-200">Pre-Press</span>
+            </div>
+
+            <!-- Drag & Drop Zone -->
+            <div id="b2bDropZone" onclick="document.getElementById('b2bFileInput').click()" class="border-2 border-dashed border-slate-300 hover:border-blue-500 bg-slate-50/70 hover:bg-blue-50/40 rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center gap-2 group">
+              <input type="file" id="b2bFileInput" accept="image/*,.pdf" class="hidden" onchange="handleB2BFileSelect(event)">
+              <div class="p-3 rounded-full bg-blue-100 text-blue-700 group-hover:scale-110 transition transform">
+                <i data-lucide="image-plus" class="w-6 h-6"></i>
+              </div>
+              <p class="text-xs font-extrabold text-slate-800">Upload Product Artwork / Label Dieline</p>
+              <p class="text-[11px] text-slate-500">Supports PNG, JPG, or PDF dielines (up to 25 MB)</p>
+            </div>
+
+            <!-- Uploaded Artwork Thumbnail Preview -->
+            <div id="b2bPreviewCard" class="hidden bg-white rounded-xl p-3 border border-slate-200 flex items-center gap-3 shadow-2xs">
+              <div class="w-16 h-16 rounded-lg bg-slate-100 overflow-hidden flex items-center justify-center border border-slate-200">
+                <img id="b2bThumbnailImg" src="" alt="Dieline Preview" class="w-full h-full object-cover">
+              </div>
+              <div class="flex-1 min-w-0">
+                <p id="b2bFilename" class="text-xs font-bold text-slate-900 truncate">artwork_dieline.png</p>
+                <p id="b2bFileDimensions" class="text-[10px] text-slate-500">1200 x 800 px • Ready for pre-flight audit</p>
+                <span class="inline-block mt-1 text-[9px] font-extrabold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-300">Artwork Mounted</span>
+              </div>
+              <button onclick="clearB2BArtwork()" class="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition" title="Remove Artwork">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Pre-Print Engineering Specifications Card -->
+          <div class="glass-panel-gov rounded-xl p-5 space-y-4">
+            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2 border-b border-slate-200 pb-3">
+              <i data-lucide="ruler" class="w-4 h-4 text-blue-700"></i>
+              2. Packaging Dimensions & Statutory Targets
+            </h3>
+
+            <!-- Dieline Total Dimensions -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Total Dieline Width (mm):</label>
+                <input type="number" id="b2bDielineW" value="250" class="w-full text-xs border border-slate-300 rounded-lg p-2 font-medium">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Total Dieline Height (mm):</label>
+                <input type="number" id="b2bDielineH" value="180" class="w-full text-xs border border-slate-300 rounded-lg p-2 font-medium">
+              </div>
+            </div>
+
+            <!-- Principal Display Panel (PDP) Dimensions -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">PDP Face Width (mm):</label>
+                <input type="number" id="b2bPdpW" value="120" class="w-full text-xs border border-slate-300 rounded-lg p-2 font-medium">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">PDP Face Height (mm):</label>
+                <input type="number" id="b2bPdpH" value="150" class="w-full text-xs border border-slate-300 rounded-lg p-2 font-medium">
+              </div>
+            </div>
+
+            <!-- Commodity Details -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Category:</label>
+                <select id="b2bCategory" class="w-full text-xs border border-slate-300 rounded-lg p-2 font-medium bg-white">
+                  <option value="Food & Beverages" selected>Food & Snacks</option>
+                  <option value="Personal Care">Personal Care</option>
+                  <option value="Household">Household</option>
+                  <option value="Pharma">Pharmaceutical</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Net Quantity:</label>
+                <div class="flex gap-1">
+                  <input type="number" id="b2bNetQtyVal" value="150" class="w-16 text-xs border border-slate-300 rounded-lg p-2 font-medium">
+                  <select id="b2bNetQtyUnit" class="w-14 text-xs border border-slate-300 rounded-lg p-2 font-medium bg-white">
+                    <option value="g" selected>g</option>
+                    <option value="kg">kg</option>
+                    <option value="ml">ml</option>
+                    <option value="l">l</option>
+                    <option value="N">N</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Target MRP (₹):</label>
+                <input type="number" id="b2bMrpVal" value="30.00" class="w-full text-xs border border-slate-300 rounded-lg p-2 font-medium">
+              </div>
+            </div>
+
+            <!-- Material & Package Type -->
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1">Packaging Manufacturing Process:</label>
+              <select id="b2bPackageType" class="w-full text-xs border border-slate-300 rounded-lg p-2 font-medium bg-white">
+                <option value="printed" selected>Printed Paperboard / Foil Laminate (Standard Table)</option>
+                <option value="blown">Blown / Molded / Perforated Plastic Container (Relaxed Table)</option>
+              </select>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-2 pt-2 border-t border-slate-200">
+              <button onclick="runB2BSandbox()" class="w-full py-3 bg-[#0A2540] hover:bg-[#13315C] text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-lg shadow-blue-950/20 flex items-center justify-center gap-2 transition transform active:scale-98 border border-amber-400/40">
+                <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
+                <span>RUN PRE-PRINT CLEARANCE AUDIT</span>
+              </button>
+              <button onclick="resetB2BSandbox()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition border border-slate-300 flex items-center justify-center gap-1.5">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-slate-500"></i>
+                <span>Reset B2B Sandbox</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Dieline Artwork Preview & Pre-Flight Clearance (7 Cols) -->
+        <div class="lg:col-span-7 space-y-5">
+          
+          <!-- Dieline Artwork Canvas Preview -->
+          <div class="glass-panel-gov rounded-xl p-5 space-y-3">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+              <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i data-lucide="layout-grid" class="w-4 h-4 text-blue-700"></i>
+                Dieline Cutting & Principal Display Panel (PDP) Visualizer
+              </h3>
+              <span id="b2bCanvasStatusBadge" class="text-[10px] font-extrabold bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full border border-slate-300">
+                Awaiting Audit
+              </span>
+            </div>
+
+            <!-- Canvas Viewport -->
+            <div id="b2bCanvasContainer" class="relative rounded-xl overflow-hidden bg-slate-950 aspect-video flex items-center justify-center border border-slate-300">
+              <!-- Empty State Placeholder -->
+              <div id="b2bCanvasEmptyState" class="text-center p-8 text-slate-400">
+                <i data-lucide="file-check-2" class="w-12 h-12 mx-auto text-slate-600 mb-2"></i>
+                <p class="text-sm font-bold text-slate-300">Awaiting Packaging Dieline Artwork</p>
+                <p class="text-xs text-slate-500 mt-1">Upload artwork image or click "Load Sample Dieline Artwork" to test</p>
+              </div>
+
+              <!-- Dieline Artwork Image -->
+              <img id="b2bResultArtworkImg" src="" alt="Pre-Print Dieline" class="hidden max-h-full max-w-full object-contain">
+            </div>
+          </div>
+
+          <!-- Pre-Print Clearance Results Card -->
+          <div id="b2bAuditResultCard" class="hidden glass-panel-gov rounded-xl p-5 space-y-4">
+            <!-- Verdict Banner -->
+            <div id="b2bVerdictBanner" class="rounded-xl p-4 border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow-sm bg-emerald-50 border-emerald-300">
+              <div>
+                <span id="b2bVerdictBadge" class="text-xs font-extrabold px-3 py-1 rounded-full uppercase bg-emerald-600 text-white">APPROVED FOR PRINT</span>
+                <p id="b2bVerdictTitle" class="text-sm font-extrabold text-slate-900 mt-1.5">Artwork Approved for Gravure Cylinder Engraving</p>
+                <p id="b2bVerdictSub" class="text-xs text-slate-600 mt-0.5">Dieline geometry and statutory text sizes strictly conform to Schedule II tables.</p>
+              </div>
+              <div class="text-right sm:border-l sm:border-emerald-200 sm:pl-4">
+                <span class="text-[10px] text-slate-500 font-bold uppercase block">Plate Cost Protection</span>
+                <span id="b2bCostSaved" class="text-lg font-black text-emerald-700">₹ 75,000 Saved</span>
+              </div>
+            </div>
+
+            <!-- Metric Breakdown Row -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div class="bg-white border border-slate-200 rounded-xl p-3 text-center shadow-2xs">
+                <p class="text-[11px] font-bold text-slate-500 uppercase">PDP Face Area</p>
+                <p id="b2bMetricPdpArea" class="text-base font-extrabold text-slate-800 mt-0.5">180.0 cm²</p>
+                <span class="text-[10px] text-blue-700 font-semibold">Rule 9 Schedule II</span>
+              </div>
+              <div class="bg-white border border-slate-200 rounded-xl p-3 text-center shadow-2xs">
+                <p class="text-[11px] font-bold text-slate-500 uppercase">Mandatory Min Font</p>
+                <p id="b2bMetricMinFont" class="text-base font-extrabold text-emerald-600 mt-0.5">4.0 mm</p>
+                <span class="text-[10px] text-emerald-700 font-bold">Statutory Threshold</span>
+              </div>
+              <div class="bg-white border border-slate-200 rounded-xl p-3 text-center shadow-2xs">
+                <p class="text-[11px] font-bold text-slate-500 uppercase">Detected Numeral</p>
+                <p id="b2bMetricDetectedFont" class="text-base font-extrabold text-slate-800 mt-0.5">4.2 mm</p>
+                <span id="b2bMetricFontPass" class="text-[10px] text-emerald-600 font-bold">+5% Margin</span>
+              </div>
+              <div class="bg-white border border-slate-200 rounded-xl p-3 text-center shadow-2xs">
+                <p class="text-[11px] font-bold text-slate-500 uppercase">Mandatory USP</p>
+                <p id="b2bMetricUsp" class="text-base font-extrabold text-slate-800 mt-0.5">₹ 0.20 / g</p>
+                <span class="text-[10px] text-slate-500 font-semibold">Rule 6(1)(da)</span>
+              </div>
+            </div>
+
+            <!-- Actionable Pre-Print Findings List -->
+            <div class="space-y-2">
+              <h4 class="font-extrabold text-slate-900 text-xs uppercase tracking-wider">
+                Pre-Press Pre-Flight Checklist & Cylinder Exposure Directives:
+              </h4>
+              <div id="b2bFindingsList" class="space-y-2">
+                <!-- Dynamically populated findings -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ==================================================================== -->
+    <!-- TAB 3: DOSSIER VAULT & ENFORCEMENT ANALYTICS -->
+    <!-- ==================================================================== -->
+    <section id="tab-vault" class="tab-content hidden space-y-6">
+      <div class="glass-panel-gov rounded-xl p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-4">
+          <div>
+            <h2 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+              <i data-lucide="database" class="w-5 h-5 text-blue-700"></i>
+              Central Legal Metrology Dossier Vault
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">Tamper-evident audit archive backed by SQLite repository</p>
+          </div>
+          <button onclick="loadVaultRecords()" class="text-xs px-3.5 py-1.5 bg-slate-200/80 hover:bg-slate-300 text-slate-800 font-bold rounded-lg flex items-center gap-1.5 transition">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh Vault
+          </button>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="flex gap-3">
+          <input type="text" id="vaultSearchInput" placeholder="Search by Reference ID or Product Name..." class="flex-1 text-xs border border-slate-300 rounded-lg px-3 py-2 font-medium" oninput="filterVaultRecords()">
+          <select id="vaultStatusFilter" class="text-xs border border-slate-300 rounded-lg px-3 py-2 font-medium" onchange="filterVaultRecords()">
+            <option value="ALL">All Statuses</option>
+            <option value="COMPLIANT">Compliant</option>
+            <option value="NON_COMPLIANT">Non-Compliant</option>
+            <option value="CRITICAL_VIOLATION">Critical Violation</option>
+          </select>
+        </div>
+
+        <!-- Records Table -->
+        <div class="overflow-x-auto rounded-xl border border-slate-200">
+          <table class="w-full text-left text-xs text-slate-700">
+            <thead class="bg-slate-200/80 text-slate-700 uppercase font-bold text-[11px] border-b border-slate-200">
+              <tr>
+                <th class="p-3">Reference ID</th>
+                <th class="p-3">Product Name</th>
+                <th class="p-3">Status</th>
+                <th class="p-3">Score</th>
+                <th class="p-3">Violations</th>
+                <th class="p-3">Inspector</th>
+                <th class="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="vaultTableBody" class="divide-y divide-slate-200 bg-white">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- National Single Sign-On & Role-Based Authentication Gateway Modal -->
+  <div id="authModal" class="hidden fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 border border-slate-200 my-auto max-h-[92vh] overflow-y-auto">
+      
+      <!-- Modal Header with Government of India Branding -->
+      <div class="flex justify-between items-start border-b border-slate-100 pb-3.5">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-xl overflow-hidden border border-cyan-500/30 bg-[#061B2E] p-0.5 shadow-sm shrink-0">
+            <img src="/static/logo.png" alt="Logo" class="w-full h-full object-cover rounded-lg">
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-300">JAN PARICHAY SSO • MERIPEHCHAAN</span>
+            </div>
+            <h3 class="font-extrabold text-slate-900 text-sm sm:text-base leading-tight">
+              विधिक मापविज्ञान अधिकृत प्रवेश द्वार
+            </h3>
+            <p class="text-[11px] text-slate-500 font-medium">National Single Sign-On & Industry Gateway</p>
+          </div>
+        </div>
+        <button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Designated Single Sign-On (Jan Parichay SSO) Profile Switcher -->
+      <div class="bg-slate-50/90 border border-slate-200/90 rounded-xl p-3.5 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-blue-700"></i>
+            National SSO Active Profiles (Jan Parichay)
+          </span>
+          <span class="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            Verified Directory
+          </span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <button type="button" onclick="quickLogin('govt')" class="p-2.5 bg-white hover:bg-amber-50/60 border border-slate-200 hover:border-amber-400 rounded-xl text-left transition shadow-2xs group cursor-pointer">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-slate-900 group-hover:text-amber-800 flex items-center gap-1">
+                🇮🇳 Govt. Enforcement Officer
+              </span>
+              <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">LMO-DEL-048</span>
+            </div>
+            <p class="text-[10px] text-slate-700 font-semibold truncate mt-1">Shri Rajesh Kumar</p>
+            <p class="text-[9px] text-slate-500 truncate">Dept. of Consumer Affairs, Delhi Circle</p>
+          </button>
+
+          <button type="button" onclick="quickLogin('b2b')" class="p-2.5 bg-white hover:bg-blue-50/60 border border-slate-200 hover:border-blue-400 rounded-xl text-left transition shadow-2xs group cursor-pointer">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-slate-900 group-hover:text-blue-800 flex items-center gap-1">
+                🏢 Registered Industry Entity
+              </span>
+              <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">GST: 07AABCA...</span>
+            </div>
+            <p class="text-[10px] text-slate-700 font-semibold truncate mt-1">Priya Sharma</p>
+            <p class="text-[9px] text-slate-500 truncate">Apex Consumer Goods Ltd (Brand Compliance)</p>
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Logged-in Status Bar -->
+      <div id="authActiveUserCard" class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2.5">
+          <div id="authActiveAvatar" class="w-8 h-8 rounded-full bg-amber-500/20 text-amber-700 flex items-center justify-center font-bold text-xs">
+            RK
+          </div>
+          <div>
+            <p id="authActiveName" class="font-bold text-slate-900 leading-tight">Shri Rajesh Kumar</p>
+            <p id="authActiveDetails" class="text-[10px] text-slate-500">GOVT_OFFICER • Dept. of Consumer Affairs, Delhi Circle</p>
+          </div>
+        </div>
+        <button onclick="logoutUser()" class="px-2.5 py-1 text-[11px] font-bold text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg border border-rose-200 transition">
+          Sign Out
+        </button>
+      </div>
+
+      <!-- Persona / Role Selector Buttons -->
+      <div>
+        <label class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Select Portal Identity</label>
+        <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
+          <button id="btnRoleGovt" onclick="setAuthSelectedRole('GOVT_OFFICER')" class="py-2 text-xs font-bold rounded-lg transition text-slate-800 bg-white shadow-2xs flex items-center justify-center gap-1.5">
+            <i data-lucide="shield-check" class="w-4 h-4 text-amber-600"></i>
+            <span>Govt Official</span>
+          </button>
+          <button id="btnRoleB2B" onclick="setAuthSelectedRole('B2B_BRAND')" class="py-2 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5">
+            <i data-lucide="briefcase" class="w-4 h-4 text-blue-600"></i>
+            <span>B2B Brand Owner</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mode Switcher: Sign In vs Register -->
+      <div class="flex border-b border-slate-200 gap-4 text-xs font-bold">
+        <button id="tabAuthSignIn" onclick="switchAuthMode('signin')" class="pb-2 text-blue-700 border-b-2 border-blue-700">
+          Sign In
+        </button>
+        <button id="tabAuthRegister" onclick="switchAuthMode('register')" class="pb-2 text-slate-500 hover:text-slate-800">
+          Register New Account
+        </button>
+      </div>
+
+      <!-- SIGN IN FORM -->
+      <form id="formAuthSignIn" onsubmit="handleAuthSignIn(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Official / Corporate Email:</label>
+          <input type="email" id="authLoginEmail" required placeholder="officer.delhi@nic.in" class="w-full text-xs border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Password:</label>
+          <input type="password" id="authLoginPassword" required placeholder="••••••••" class="w-full text-xs border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div class="flex items-center justify-between text-xs text-slate-500 pt-1">
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="checkbox" id="authRememberMe" checked class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+            <span>Remember credentials</span>
+          </label>
+          <a href="javascript:void(0)" onclick="showToast('Password recovery link dispatched to registered official email.', true)" class="text-[11px] text-blue-700 hover:text-blue-900 hover:underline">Forgot password or PIN?</a>
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-[#0A2540] hover:bg-[#13315C] text-white text-xs font-extrabold rounded-xl shadow-md transition active:scale-98 flex items-center justify-center gap-2">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>Authenticate & Enter Station</span>
+        </button>
+      </form>
+
+      <!-- REGISTER FORM -->
+      <form id="formAuthRegister" onsubmit="handleAuthRegister(event)" class="space-y-3 hidden">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Full Legal Name:</label>
+            <input type="text" id="authRegName" required placeholder="Dr. Vivek Sharma" class="w-full text-xs border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Email Address:</label>
+            <input type="email" id="authRegEmail" required placeholder="name@domain.com" class="w-full text-xs border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label id="lblRegOrg" class="block text-xs font-bold text-slate-700 mb-1">Organization / Circle:</label>
+            <input type="text" id="authRegOrg" required placeholder="Dept. of Consumer Affairs" class="w-full text-xs border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label id="lblRegBadge" class="block text-xs font-bold text-slate-700 mb-1">Officer Badge ID / Cadre:</label>
+            <input type="text" id="authRegBadgeOrGstin" placeholder="LMO-DEL-099" class="w-full text-xs border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Designation:</label>
+            <input type="text" id="authRegDesignation" placeholder="Legal Metrology Officer" class="w-full text-xs border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Contact Phone:</label>
+            <input type="tel" id="authRegPhone" placeholder="+91 98765 43210" class="w-full text-xs border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Set Secure Password (min 6 chars):</label>
+          <input type="password" id="authRegPassword" required placeholder="••••••••" minlength="6" class="w-full text-xs border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+
+        <button type="submit" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-extrabold rounded-xl shadow-md transition active:scale-98 flex items-center justify-center gap-2">
+          <i data-lucide="user-plus" class="w-4 h-4"></i>
+          <span>Create Account & Log In</span>
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Interactive First-Time User Orientation & Feature Guide Modal -->
+  <div id="onboardingModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 sm:p-7 shadow-2xl space-y-5 border border-slate-200 my-auto animate-in fade-in zoom-in duration-150">
+      
+      <!-- Guide Header -->
+      <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-xl overflow-hidden border border-cyan-500/30 bg-[#061B2E] p-0.5 shadow-sm shrink-0">
+            <img src="/static/logo.png" alt="Logo" class="w-full h-full object-cover rounded-lg">
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-300">PLATFORM ORIENTATION</span>
+              <span id="onboardingStepBadge" class="text-[10px] font-bold text-slate-500 font-mono">Step 1 of 5</span>
+            </div>
+            <h3 class="font-extrabold text-slate-900 text-sm sm:text-base leading-tight">
+              National Legal Metrology Portal Walkthrough
+            </h3>
+          </div>
+        </div>
+        <button onclick="closeOnboardingGuide()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Guide Slides Container -->
+      <div id="onboardingSlideContainer" class="min-h-[220px] flex items-center">
+        <!-- Slide 1: Dual Role System -->
+        <div id="guideSlide-1" class="guide-slide space-y-3">
+          <div class="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center">
+            <i data-lucide="users" class="w-6 h-6"></i>
+          </div>
+          <h4 class="font-extrabold text-slate-900 text-sm">1. Dual-Persona Role-Based Access Control</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            The portal serves two distinct stakeholders:
+          </p>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="p-2.5 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-950">
+              <p class="font-bold flex items-center gap-1"><i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-700"></i> Govt Officer (LMO)</p>
+              <p class="text-[10px] text-slate-600 mt-1">Enforce Legal Metrology Act, issue statutory seizure notices, audit Central Vault.</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-blue-50/80 border border-blue-200 text-blue-950">
+              <p class="font-bold flex items-center gap-1"><i data-lucide="briefcase" class="w-3.5 h-3.5 text-blue-700"></i> B2B Brand Owner</p>
+              <p class="text-[10px] text-slate-600 mt-1">Pre-flight dieline audits, test packaging prototypes, save ₹75k cylinder costs.</p>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-500">Switch between Enforcement Officer and Brand Owner workspaces at any time using the identity switcher in the top navigation bar.</p>
+        </div>
+
+        <!-- Slide 2: Single Scan Inspection -->
+        <div id="guideSlide-2" class="guide-slide space-y-3 hidden">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center">
+            <i data-lucide="scan-line" class="w-6 h-6"></i>
+          </div>
+          <h4 class="font-extrabold text-slate-900 text-sm">2. Automated Single-Scan Inspection Station</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Upload a packaging photograph or capture via live camera. The unified pipeline automatically performs:
+          </p>
+          <ul class="text-xs text-slate-700 space-y-1.5 list-disc list-inside">
+            <li><strong>3D Cylindrical De-warping:</strong> Unrolls curved cans and bottles for planar OCR.</li>
+            <li><strong>Sub-Millimeter Scale Calibration:</strong> Calibrates physical scale via credit cards or Indian Rupee coins.</li>
+            <li><strong>Physical QR Auto-Detection:</strong> Auto-scans on-pack QR codes for digital disclosure harmonization.</li>
+            <li><strong>Rule 6/9/13/18 Compliance Audit:</strong> Verifies MRP, Net Qty, USP, Mfg Date, and Customer Care.</li>
+          </ul>
+        </div>
+
+        <!-- Slide 3: Interactive Canvas & Virtual Caliper -->
+        <div id="guideSlide-3" class="guide-slide space-y-3 hidden">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-700 flex items-center justify-center">
+            <i data-lucide="ruler" class="w-6 h-6"></i>
+          </div>
+          <h4 class="font-extrabold text-slate-900 text-sm">3. Interactive Multi-View & Virtual Caliper</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Inspect physical declarations with interactive statutory tools:
+          </p>
+          <ul class="text-xs text-slate-700 space-y-1.5 list-disc list-inside">
+            <li><strong>Annotated vs. Original vs. Split-View:</strong> Instant visual comparison between raw and audited label.</li>
+            <li><strong>Schedule II Virtual Caliper:</strong> Measures net quantity numeral heights down to 0.1 mm against statutory minimum thresholds.</li>
+            <li><strong>Declarations Matrix Spotlighting:</strong> Hover over any statutory declaration row to spotlight its physical ink location.</li>
+          </ul>
+        </div>
+
+        <!-- Slide 4: B2B Pre-Print Sandbox -->
+        <div id="guideSlide-4" class="guide-slide space-y-3 hidden">
+          <div class="w-12 h-12 rounded-2xl bg-violet-50 border border-violet-200 text-violet-700 flex items-center justify-center">
+            <i data-lucide="package-check" class="w-6 h-6"></i>
+          </div>
+          <h4 class="font-extrabold text-slate-900 text-sm">4. B2B Industrial Pre-Print Artwork Studio</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Designed for FMCG brand compliance teams and pre-press houses:
+          </p>
+          <ul class="text-xs text-slate-700 space-y-1.5 list-disc list-inside">
+            <li>Drag & drop packaging dieline artworks before rotogravure cylinder engraving.</li>
+            <li>Verifies Principal Display Panel (PDP) dimensions and Schedule II font rules.</li>
+            <li><strong>₹ 75,000 Cylinder Plate Cost Protection:</strong> Identifies statutory defects before committing costly plate manufacturing runs.</li>
+          </ul>
+        </div>
+
+        <!-- Slide 5: Vault & PDF Exports -->
+        <div id="guideSlide-5" class="guide-slide space-y-3 hidden">
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center">
+            <i data-lucide="database" class="w-6 h-6"></i>
+          </div>
+          <h4 class="font-extrabold text-slate-900 text-sm">5. Central Dossier Vault & Statutory Notices</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Every inspection can be saved to the persistent Central SQLite Vault:
+          </p>
+          <ul class="text-xs text-slate-700 space-y-1.5 list-disc list-inside">
+            <li>Full audit trail with officer ID, circle, timestamp, and geotagging.</li>
+            <li>Download tamper-evident official PDF reports complete with digital verification hashes.</li>
+            <li>Filter nationwide inspection records and review violation analytics.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Navigation & Step Dots -->
+      <div class="border-t border-slate-100 pt-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-1.5" id="guideStepDots">
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-600 transition"></span>
+          <span class="w-2 h-2 rounded-full bg-slate-200 transition"></span>
+          <span class="w-2 h-2 rounded-full bg-slate-200 transition"></span>
+          <span class="w-2 h-2 rounded-full bg-slate-200 transition"></span>
+          <span class="w-2 h-2 rounded-full bg-slate-200 transition"></span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="btnPrevGuide" onclick="prevOnboardingStep()" class="px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-800 rounded-lg border border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+            Previous
+          </button>
+          <button id="btnNextGuide" onclick="nextOnboardingStep()" class="px-4 py-1.5 text-xs font-extrabold bg-[#0A2540] hover:bg-[#13315C] text-white rounded-lg shadow transition flex items-center gap-1">
+            <span>Next</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+        <label class="flex items-center gap-1.5 cursor-pointer">
+          <input type="checkbox" id="chkDoNotShowGuide" class="rounded border-slate-300 text-blue-600">
+          <span>Don't show this orientation automatically again</span>
+        </label>
+        <span>Reopen anytime via ❓ User Guide</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Floating Toast Notification Banner -->
+  <div id="portalToast" class="hidden fixed bottom-6 right-6 z-50 bg-slate-950/95 backdrop-blur-md text-white text-xs px-4 py-3 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-2.5 transition transform duration-200">
+    <div id="toastIcon" class="text-emerald-400">
+      <i data-lucide="check-circle" class="w-4 h-4"></i>
+    </div>
+    <span id="toastMsg" class="font-bold">Notification message</span>
+  </div>
+
+  <!-- Official Government Footer -->
+  <footer class="bg-[#061B2E] text-slate-400 border-t border-slate-800 py-5 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center text-xs gap-3">
+      <div>
+        <p class="font-bold text-slate-200">राष्ट्रीय विधिक मापविज्ञान पैकेजिंग अनुपालन एवं प्रवर्तन पोर्टल</p>
+        <p class="text-[11px] text-slate-400 mt-0.5">
+          उपभोक्ता मामले विभाग • उपभोक्ता मामले, खाद्य और सार्वजनिक वितरण मंत्रालय, भारत सरकार
+        </p>
+      </div>
+      <div class="text-right text-[11px] text-slate-400">
+        <p>© 2026 Legal Metrology Enforcement Division • Act No. 1 of 2010</p>
+        <p class="text-slate-500 mt-0.5">Rule 6 Mandatory Declarations • Rule 9 Schedule II • Rule 13 • Section 36</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "Legal Metrology Inspector Portal",
+  "short_name": "LM Inspector",
+  "description": "Offline-First Legal Metrology (Packaged Commodities) Rules Compliance Scanner",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1e3a8a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
