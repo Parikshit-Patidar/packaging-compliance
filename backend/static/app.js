@@ -1714,8 +1714,20 @@ async function checkAiStatus() {
   try {
     const dot = document.getElementById('aiStatusDot');
     const text = document.getElementById('aiStatusText');
-    if (dot) dot.className = 'pulse-dot bg-emerald-400';
-    if (text) text.textContent = 'Gemini 3.6 AI Vision • Online';
+    const res = await fetch('/api/v1/config/ai-status');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.gemini_active) {
+        if (dot) dot.className = 'pulse-dot bg-emerald-400';
+        if (text) text.textContent = 'Gemini 3.5 AI Vision • Online';
+      } else {
+        if (dot) dot.className = 'pulse-dot bg-amber-400';
+        if (text) text.textContent = 'Local OCR Active';
+      }
+    } else {
+      if (dot) dot.className = 'pulse-dot bg-emerald-400';
+      if (text) text.textContent = 'Gemini AI Vision • Online';
+    }
   } catch (e) {
     console.warn('AI status check note:', e);
   }
