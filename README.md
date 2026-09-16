@@ -1,4 +1,4 @@
-﻿# Legal Metrology (Packaged Commodities) Compliance System ⚖️📦
+# Legal Metrology (Packaged Commodities) Compliance System ⚖️📦
 **Next-Generation AI Inspection, Reference Object Calibration & Statutory Enforcement Engine**
 
 Built for Enforcement Officers, Brand Compliance Managers, and Packaging Designers under the **Legal Metrology Act, 2009** and **Legal Metrology (Packaged Commodities) Rules, 2011** (with 2021/2022 amendments).
@@ -51,76 +51,32 @@ Built for Enforcement Officers, Brand Compliance Managers, and Packaging Designe
 
 ---
 
-## 🚀 Getting Started & Installation
-
-### Prerequisites
-- Python 3.10+
-- Node.js 18+ and npm (for React PWA frontend)
-- Git
-
-### 1. Clone Repository
-```bash
-git clone https://github.com/Parikshit-Patidar/packaging-compliance.git
-cd packaging-compliance
-```
-
-### 2. Set Up Python Virtual Environment
-**Windows (PowerShell):**
-```powershell
-python -m venv venv
-.\venv\Scripts\activate
-```
-
-**Linux / macOS:**
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### 3. Install Dependencies
-```bash
-pip install -r backend/requirements.txt
-```
-
-### 4. Configure Environment Variables (Optional)
-Copy the template configuration file:
-```bash
-cp .env.example .env
-```
-Provide your Google Gemini Multimodal Vision API key in `.env` (or via system environment variable `GEMINI_API_KEY`):
-```env
-GEMINI_API_KEY=your_gemini_api_key_here
-```
-
----
-
-## 🧪 Testing & Execution
+## 🚀 How to Run
 
 ### 1. Run Automated Advanced Subsystem Tests
-```bash
-python -B backend/test_advanced_pipeline.py
-python -B backend/test_compliance.py
+```powershell
+& "C:\Users\aasho\AppData\Local\PackagingCompliance\venv\Scripts\python.exe" -B backend/test_advanced_pipeline.py
 ```
 
 ### 2. Launch FastAPI REST Server
-```bash
-uvicorn api:app --app-dir backend --port 8000 --reload
+```powershell
+& "C:\Users\aasho\AppData\Local\PackagingCompliance\venv\Scripts\python.exe" -m uvicorn api:app --app-dir backend --port 8000 --reload
 ```
-Interactive Swagger API documentation is available at: **`http://localhost:8000/docs`**
+Interactive Swagger API docs available at: **`http://localhost:8000/docs`**
 
 ### 3. Launch Streamlit Interactive Testing Workbench
-```bash
-streamlit run backend/main.py
+```powershell
+& "C:\Users\aasho\AppData\Local\PackagingCompliance\venv\Scripts\python.exe" -m streamlit run backend/main.py
 ```
-Workbench is accessible at: **`http://localhost:8501`**
+Workbench available at: **`http://localhost:8501`**
 
-### 4. Launch Offline-First React PWA Frontend
+### 4. Frontend React PWA (Optional Development Mode)
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-PWA is accessible at: **`http://localhost:3000`**
+PWA available at: **`http://localhost:3000`**
 
 ---
 

@@ -1,9 +1,12 @@
-﻿services:
+services:
   - type: web
     name: packaging-compliance
     env: python
-    buildCommand: pip install -r backend/requirements.txt
+    plan: free
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
     startCommand: uvicorn api:app --app-dir backend --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
+      - key: GEMINI_API_KEY
+        sync: false

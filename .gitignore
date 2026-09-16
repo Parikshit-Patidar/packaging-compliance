@@ -1,38 +1,33 @@
-﻿# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
+# Backend
 venv/
-ENV/
+.venv/
 backend/venv/
 backend/__pycache__/
-.pytest_cache/
-.coverage
-htmlcov/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
 *.sqlite
 *.sqlite3
-*.db
+*.log
 
-# Frontend / Node
-node_modules/
+# Frontend
 frontend/node_modules/
 frontend/dist/
 frontend/.next/
 frontend/build/
-.npm/
-*.log
+.next/
+dist/
+node_modules/
 
-# Environment variables & Local configuration
+# Environment Variables & Secrets
 .env
 .env.local
-.env.*.local
+*.pem
 
-# Operating System & IDE artifacts
-.DS_Store
-Thumbs.db
+# IDE & OS
 .vscode/
 .idea/
-*.swp
+.DS_Store
+Thumbs.db
