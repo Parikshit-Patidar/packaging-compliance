@@ -40,56 +40,56 @@
 
   <!-- Official Ministry Top Navigation Header (Sovereign Navy) -->
   <header class="bg-[#0c2033] text-white shadow-md sticky top-0 z-50 border-b border-[#183654]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap justify-between items-center gap-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-3 sm:gap-4">
       
       <!-- Ministry Identity & Official Emblem Seal -->
-      <div class="flex items-center gap-3.5">
+      <div class="flex items-center gap-3 min-w-0 flex-1">
         <!-- National Emblem / Compliance Portal Logo -->
-        <div class="w-12 h-12 rounded-xl overflow-hidden border border-amber-400/40 shadow-sm flex-shrink-0 bg-slate-900/60 p-0.5 group flex items-center justify-center">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl overflow-hidden border border-amber-400/40 shadow-xs shrink-0 bg-slate-900/60 p-0.5 group flex items-center justify-center">
           <img src="/static/logo.png" alt="National Legal Metrology Emblem" class="w-full h-full object-cover rounded-lg group-hover:scale-105 transition">
         </div>
 
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="text-[11px] font-semibold text-amber-300 uppercase tracking-widest">विधिक मापविज्ञान प्रभाग • LEGAL METROLOGY DIVISION</span>
-            <span class="bg-amber-400/15 text-amber-300 border border-amber-400/30 text-[9px] px-1.5 py-0.2 rounded font-mono font-bold">OFFICIAL PORTAL</span>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5 leading-none mb-0.5">
+            <span class="text-[10px] sm:text-[11px] font-semibold text-amber-300 uppercase tracking-wider truncate">भारत सरकार • GOVERNMENT OF INDIA</span>
+            <span class="bg-amber-400/15 text-amber-300 border border-amber-400/30 text-[9px] px-1 py-0.2 rounded font-mono font-bold hidden md:inline">OFFICIAL</span>
           </div>
-          <h1 class="text-base sm:text-lg font-bold tracking-tight text-white leading-tight">
+          <h1 class="text-sm sm:text-base md:text-lg font-bold tracking-tight text-white leading-tight truncate">
             National Legal Metrology Packaging Compliance System
           </h1>
-          <p class="text-[11px] text-slate-300 font-normal">
+          <p class="text-[10px] sm:text-[11px] text-slate-300 font-normal truncate hidden sm:block">
             Department of Consumer Affairs • Legal Metrology (Packaged Commodities) Rules, 2011 & Schedule II
           </p>
         </div>
       </div>
 
-      <!-- Live Enforcement Terminal, Guide & Officer Profile -->
-      <div class="flex items-center gap-2.5 text-xs">
+      <!-- Right-Aligned Action Suite: Pitch Deck, User Guide, AI Status & Officer Profile -->
+      <div class="flex items-center gap-2 sm:gap-2.5 text-xs shrink-0 ml-auto justify-end">
         <!-- Interactive 4-Member Pitch Deck Button -->
-        <a id="btnOpenDeck" href="/static/presentation.html" target="_blank" class="flex items-center gap-1.5 bg-[#183654] hover:bg-[#20446a] text-slate-200 hover:text-white border border-slate-600/80 px-3 py-1.5 rounded-lg font-semibold transition shadow-xs group" title="Open 4-member hackathon pitch presentation deck">
-          <i data-lucide="presentation" class="w-4 h-4 text-amber-400 group-hover:scale-105 transition"></i>
-          <span class="hidden md:inline">Pitch Deck</span>
+        <a id="btnOpenDeck" href="/static/presentation.html" target="_blank" class="flex items-center gap-1.5 bg-[#183654] hover:bg-[#20446a] text-slate-200 hover:text-white border border-slate-600/80 px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold transition shadow-xs group whitespace-nowrap" title="Open 4-member hackathon pitch presentation deck">
+          <i data-lucide="presentation" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 group-hover:scale-105 transition"></i>
+          <span class="hidden sm:inline">Pitch Deck</span>
         </a>
 
         <!-- One-Time / On-Demand Interactive User Orientation Guide Button -->
-        <button id="btnOpenGuide" onclick="openOnboardingGuide()" class="flex items-center gap-1.5 bg-[#183654] hover:bg-[#20446a] text-slate-200 hover:text-white border border-slate-600/80 px-3 py-1.5 rounded-lg font-semibold transition shadow-xs group" title="Open platform orientation walkthrough & feature guide">
-          <i data-lucide="help-circle" class="w-4 h-4 text-amber-400 group-hover:scale-105 transition"></i>
-          <span class="hidden md:inline">User Guide</span>
+        <button id="btnOpenGuide" onclick="openOnboardingGuide()" class="flex items-center gap-1.5 bg-[#183654] hover:bg-[#20446a] text-slate-200 hover:text-white border border-slate-600/80 px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold transition shadow-xs group whitespace-nowrap" title="Open platform orientation walkthrough & feature guide">
+          <i data-lucide="help-circle" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 group-hover:scale-105 transition"></i>
+          <span class="hidden sm:inline">User Guide</span>
         </button>
 
         <!-- Sovereign AI Vision Status Pill -->
-        <div id="aiStatusPill" class="flex items-center gap-2 bg-[#12283f] border border-emerald-500/30 px-3 py-1.5 rounded-lg shadow-xs" title="Sovereign Multimodal Vision AI Model Active">
+        <div id="aiStatusPill" class="flex items-center gap-1.5 sm:gap-2 bg-[#12283f] border border-emerald-500/30 px-2.5 sm:px-3 py-1.5 rounded-lg shadow-xs whitespace-nowrap" title="Sovereign Multimodal Vision AI Model Active">
           <span id="aiStatusDot" class="pulse-dot bg-emerald-400"></span>
-          <span id="aiStatusText" class="font-semibold text-emerald-300 text-[11px] hidden sm:inline">AI Vision • Online</span>
+          <span id="aiStatusText" class="font-semibold text-emerald-300 text-[11px] hidden md:inline">AI Vision • Online</span>
           <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-400"></i>
         </div>
 
         <!-- Dynamic User Profile Capsule (Govt Officer vs B2B Brand) -->
-        <div id="userProfileCapsule" onclick="openAuthModal()" class="flex items-center gap-2 bg-[#12283f] border border-slate-600/80 hover:border-amber-400/70 px-3 py-1.5 rounded-lg cursor-pointer transition shadow-xs group select-none" title="Click to view credentials, switch role, or login">
-          <div id="userRoleIconContainer" class="w-7 h-7 rounded-md bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-105 transition">
+        <div id="userProfileCapsule" onclick="openAuthModal()" class="flex items-center gap-2 bg-[#12283f] border border-slate-600/80 hover:border-amber-400/70 px-2.5 sm:px-3 py-1.5 rounded-lg cursor-pointer transition shadow-xs group select-none whitespace-nowrap" title="Click to view credentials, switch role, or login">
+          <div id="userRoleIconContainer" class="w-7 h-7 rounded-md bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-105 transition shrink-0">
             <i id="userRoleIcon" data-lucide="shield-check" class="w-4 h-4"></i>
           </div>
-          <div class="text-left">
+          <div class="text-left hidden sm:block">
             <div class="flex items-center gap-1.5">
               <p id="topBarUserName" class="font-bold text-slate-100 text-[11px] leading-tight">Shri Rajesh Kumar</p>
               <span id="topBarRoleBadge" class="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">GOVT LMO</span>
