@@ -159,6 +159,60 @@ code, pre, .font-mono {
   display: inline-block;
 }
 
+/* Sovereign Institutional Top Navigation Header */
+.gov-main-header {
+  background-color: #0c2033;
+  color: #ffffff;
+  border-bottom: 1px solid #183654;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+}
+
+.gov-header-inner {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0.625rem 1.5rem !important;
+  gap: 1rem !important;
+  box-sizing: border-box !important;
+}
+
+.gov-header-brand {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+  overflow: hidden !important;
+}
+
+.gov-header-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 0.5rem !important;
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+
+.gov-nav-strip {
+  border-top: 1px solid #183654;
+  background-color: #f8fafc;
+  padding: 0.375rem 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* Modern Institutional Navigation Tabs (Understated & Professional) */
 .nav-tab {
   display: inline-flex;
