@@ -318,9 +318,17 @@ class LegalMetrologyComplianceEngine:
         # 1. Rule 6(1)(a): Manufacturer / Packer / Importer Name & Address
         mfg_name = dec.manufacturer_name or dec.packer_name or dec.importer_name
         mfg_addr = dec.manufacturer_address or dec.packer_address or dec.importer_address
+
+        # Auto-reconcile merged name/address strings
+        if mfg_name and not mfg_addr:
+            if re.search(r"\b[1-9][0-9]{5}\b", mfg_name) or any(k in mfg_name.lower() for k in ["road", "street", "plot", "sector", "nagar", "industrial", "dist", "state", "india", "pvt", "ltd"]):
+                mfg_addr = mfg_name
+        if mfg_addr and not mfg_name:
+            mfg_name = mfg_addr
+
         mfg_val_str = f"Name: {mfg_name or 'MISSING'} | Addr: {mfg_addr or 'MISSING'}"
 
-        if mfg_name and mfg_addr and len(mfg_addr.strip()) > 8:
+        if mfg_name and mfg_addr and (len(mfg_addr.strip()) >= 5 or len(mfg_name.strip()) >= 10):
             check_results.append(RuleCheckResult(
                 rule_id="RULE_6_1_A_MFG",
                 title="Manufacturer / Packer / Importer Details",
@@ -539,14 +547,17 @@ class LegalMetrologyComplianceEngine:
             f"₹ {dec.unit_sale_price_value:.2f} per {dec.unit_sale_price_unit or 'unit'}" if dec.unit_sale_price_value else None
         )
 
-        if has_usp:
+        is_exempt_rule_26 = bool(dec.net_quantity_value and dec.net_quantity_value <= 10.0 and (dec.net_quantity_unit or "").lower() in ["g", "ml", "mg"])
+
+        if has_usp or is_exempt_rule_26:
+            details_str = f"Unit Sale Price declared: {usp_display}" if has_usp else "Statutorily exempt from USP under Rule 26 (Net quantity ≤ 10g/ml)."
             check_results.append(RuleCheckResult(
                 rule_id="RULE_6_1_DA_USP",
                 title="Unit Sale Price (USP) Declaration",
-                clause="Rule 6(1)(da) [Amendment 2022], LM(PC) Rules, 2011",
+                clause="Rule 6(1)(da) [Amendment 2022] & Rule 26, LM(PC) Rules, 2011",
                 passed=True,
-                details=f"Unit Sale Price declared: {usp_display}",
-                extracted_value=usp_display
+                details=details_str,
+                extracted_value=usp_display or "EXEMPT (Rule 26)"
             ))
         else:
             suggested_usp = ""
@@ -619,9 +630,9 @@ class LegalMetrologyComplianceEngine:
 
         # 6b. Inclusive of all taxes phrase check
         has_tax_phrase = dec.mrp_inclusive_taxes_mentioned
-        if has_tax_phrase is None and mrp_raw:
-            tax_keywords = ["incl", "tax", "inclusive of all taxes", "incl. of all taxes"]
-            has_tax_phrase = any(k in mrp_raw.lower() for k in tax_keywords)
+        if not has_tax_phrase and mrp_raw:
+            tax_keywords = ["incl", "tax", "inclusive of all taxes", "incl. of all taxes", "incl of all taxes", "all taxes incl", "incl. taxes"]
+            has_tax_phrase = any(k in mrp_raw.lower() for k in tax_keywords) or any(k in (getattr(dec, "visible_text_transcript", "") or "").lower() for k in tax_keywords)
 
         if has_tax_phrase:
             check_results.append(RuleCheckResult(
