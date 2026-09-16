@@ -378,12 +378,12 @@ function setViewMode(mode) {
 
   [btnAnnotated, btnOriginal, btnSplit, btn3D].forEach(b => {
     if (b) {
-      b.className = 'px-2.5 py-1 rounded font-bold text-slate-400 hover:text-white transition flex items-center gap-1';
+      b.className = 'segmented-btn';
     }
   });
 
   if (mode === 'annotated') {
-    if (btnAnnotated) btnAnnotated.className = 'px-2.5 py-1 rounded font-bold bg-blue-600 text-white shadow transition flex items-center gap-1';
+    if (btnAnnotated) btnAnnotated.className = 'segmented-btn active';
     if (canvasViewport) canvasViewport.classList.remove('hidden');
     if (splitContainer) splitContainer.classList.add('hidden');
     if (threejsViewport) threejsViewport.classList.add('hidden');
@@ -391,7 +391,7 @@ function setViewMode(mode) {
     if (origImg) origImg.classList.add('hidden');
     if (svgOverlay) svgOverlay.classList.remove('hidden');
   } else if (mode === 'original') {
-    if (btnOriginal) btnOriginal.className = 'px-2.5 py-1 rounded font-bold bg-blue-600 text-white shadow transition flex items-center gap-1';
+    if (btnOriginal) btnOriginal.className = 'segmented-btn active';
     if (canvasViewport) canvasViewport.classList.remove('hidden');
     if (splitContainer) splitContainer.classList.add('hidden');
     if (threejsViewport) threejsViewport.classList.add('hidden');
@@ -399,12 +399,12 @@ function setViewMode(mode) {
     if (origImg) origImg.classList.remove('hidden');
     if (svgOverlay) svgOverlay.classList.add('hidden');
   } else if (mode === 'split') {
-    if (btnSplit) btnSplit.className = 'px-2.5 py-1 rounded font-bold bg-blue-600 text-white shadow transition flex items-center gap-1';
+    if (btnSplit) btnSplit.className = 'segmented-btn active';
     if (canvasViewport) canvasViewport.classList.add('hidden');
     if (splitContainer) splitContainer.classList.remove('hidden');
     if (threejsViewport) threejsViewport.classList.add('hidden');
   } else if (mode === '3d') {
-    if (btn3D) btn3D.className = 'px-2.5 py-1 rounded font-bold bg-amber-600 text-white shadow transition flex items-center gap-1 border border-amber-400';
+    if (btn3D) btn3D.className = 'segmented-btn active text-amber-800';
     if (canvasViewport) canvasViewport.classList.add('hidden');
     if (splitContainer) splitContainer.classList.add('hidden');
     if (threejsViewport) threejsViewport.classList.remove('hidden');
@@ -1116,20 +1116,20 @@ function renderAuditResults(data) {
   scoreVal.textContent = `${(data.compliance_score || 0).toFixed(0)}%`;
 
   if (data.compliance_status === 'COMPLIANT') {
-    banner.className = 'rounded-xl p-5 border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm bg-emerald-50/80 border-emerald-300';
-    badge.className = 'text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider bg-emerald-600 text-white';
+    banner.className = 'gov-card p-5 border-l-4 border-l-emerald-600 bg-emerald-50/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm';
+    badge.className = 'gov-badge gov-badge-green text-xs font-bold px-3 py-1';
     badge.textContent = 'COMPLIANT (PASSED)';
     subtitle.textContent = 'Packaged commodity strictly adheres to Legal Metrology Rules, 2011 & Amendments.';
     scoreVal.className = 'text-3xl font-extrabold text-emerald-700';
   } else if (data.compliance_status === 'CRITICAL_VIOLATION') {
-    banner.className = 'rounded-xl p-5 border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm bg-rose-50/80 border-rose-300';
-    badge.className = 'text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider bg-rose-600 text-white';
+    banner.className = 'gov-card p-5 border-l-4 border-l-rose-600 bg-rose-50/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm';
+    badge.className = 'gov-badge text-xs font-bold px-3 py-1 bg-rose-100 text-rose-800 border border-rose-300';
     badge.textContent = 'CRITICAL VIOLATION';
     subtitle.textContent = 'Critical statutory non-compliance detected. Subject to Section 36 penalties.';
     scoreVal.className = 'text-3xl font-extrabold text-rose-700';
   } else {
-    banner.className = 'rounded-xl p-5 border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm bg-amber-50/80 border-amber-300';
-    badge.className = 'text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider bg-amber-600 text-white';
+    banner.className = 'gov-card p-5 border-l-4 border-l-amber-600 bg-amber-50/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm';
+    badge.className = 'gov-badge gov-badge-saffron text-xs font-bold px-3 py-1';
     badge.textContent = 'NON-COMPLIANT';
     subtitle.textContent = 'Statutory defects detected. Corrective notice recommended under Rule 6.';
     scoreVal.className = 'text-3xl font-extrabold text-amber-700';
