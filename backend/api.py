@@ -947,9 +947,6 @@ def update_gemini_key(req: SaveKeyRequest):
     return {"status": "SUCCESS", "message": "Gemini API key stored successfully"}
 
 
-LOGO_PATH = r"C:\Users\aasho\AppData\Local\PackagingCompliance\logo.png"
-
-
 LOGO_PATH = os.path.join(STATIC_DIR, "logo.png")
 
 

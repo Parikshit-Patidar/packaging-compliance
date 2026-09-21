@@ -20,6 +20,8 @@ export default function App() {
   const [consumerPhone, setConsumerPhone] = useState('1800-419-5555');
   const [consumerEmail, setConsumerEmail] = useState('care@chips.in');
   const [refObject, setRefObject] = useState('CREDIT_CARD');
+  const [isLoading, setIsLoading] = useState(false);
+  const [auditResult, setAuditResult] = useState(null);
   
   // Benchmark state
   const [benchmarkResult, setBenchmarkResult] = useState(null);

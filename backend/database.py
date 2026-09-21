@@ -28,6 +28,12 @@ def _safe_json_dumps(obj: Any) -> str:
 
 
 def get_db_path() -> str:
+    if os.environ.get("DATABASE_PATH"):
+        path = os.environ["DATABASE_PATH"]
+        parent = os.path.dirname(os.path.abspath(path))
+        if parent:
+            os.makedirs(parent, exist_ok=True)
+        return path
     base_dir = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~")
     vault_dir = os.path.join(base_dir, "PackagingCompliance")
     os.makedirs(vault_dir, exist_ok=True)
@@ -37,7 +43,7 @@ DB_PATH = get_db_path()
 
 
 def get_db_connection() -> sqlite3.Connection:
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(get_db_path())
     conn.row_factory = sqlite3.Row
     return conn
 

@@ -51,32 +51,190 @@ Built for Enforcement Officers, Brand Compliance Managers, and Packaging Designe
 
 ---
 
-## 🚀 How to Run
+## 🚀 How to Run Locally on Any Computer
 
-### 1. Run Automated Advanced Subsystem Tests
-```powershell
-& "C:\Users\aasho\AppData\Local\PackagingCompliance\venv\Scripts\python.exe" -B backend/test_advanced_pipeline.py
+### Prerequisites
+* **Python 3.10+** installed on your system.
+* *(Optional)* **Node.js 18+ and npm** (only required if developing the offline React PWA frontend).
+
+---
+
+### Step 1: Clone and Navigate to Project Directory
+```bash
+cd packaging-compliance-main
 ```
 
-### 2. Launch FastAPI REST Server
-```powershell
-& "C:\Users\aasho\AppData\Local\PackagingCompliance\venv\Scripts\python.exe" -m uvicorn api:app --app-dir backend --port 8000 --reload
-```
-Interactive Swagger API docs available at: **`http://localhost:8000/docs`**
+---
 
-### 3. Launch Streamlit Interactive Testing Workbench
-```powershell
-& "C:\Users\aasho\AppData\Local\PackagingCompliance\venv\Scripts\python.exe" -m streamlit run backend/main.py
-```
-Workbench available at: **`http://localhost:8501`**
+### Step 2: Set Up Python Virtual Environment
 
-### 4. Frontend React PWA (Optional Development Mode)
+#### On Windows (PowerShell / Command Prompt):
+```powershell
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment in PowerShell
+.\venv\Scripts\Activate.ps1
+
+# (Or in Command Prompt: .\venv\Scripts\activate.bat)
+```
+
+#### On Linux / macOS (Terminal):
+```bash
+# Create virtual environment
+python3 -m venv venv
+
+# Activate virtual environment
+source venv/bin/activate
+```
+
+---
+
+### Step 3: Install Dependencies
+```bash
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+---
+
+### Step 4 (Optional): Set Environment Variables
+You can configure your Google Gemini API Key via an environment variable or enter it directly in the Streamlit Workbench UI:
+
+* **Windows PowerShell**:
+  ```powershell
+  $env:GEMINI_API_KEY="your_gemini_api_key_here"
+  ```
+* **Windows CMD**:
+  ```cmd
+  set GEMINI_API_KEY=your_gemini_api_key_here
+  ```
+* **Linux / macOS**:
+  ```bash
+  export GEMINI_API_KEY="your_gemini_api_key_here"
+  ```
+
+---
+
+### Step 5: Run the Applications
+
+#### Option A: Launch Streamlit Interactive Testing Workbench (Recommended for UI Testing)
+```bash
+streamlit run backend/main.py
+```
+* **Interactive UI**: Open **`http://localhost:8501`** in your browser.
+* Access live calibration, 3D de-warping, QR harmonization, zero-error benchmarks, and PDF audit generation.
+
+#### Option B: Launch FastAPI REST Server
+```bash
+uvicorn api:app --app-dir backend --host 0.0.0.0 --port 8000 --reload
+```
+*Or via the WSGI/ASGI runner:*
+```bash
+python wsgi.py
+```
+* **API Base URL**: `http://localhost:8000`
+* **Interactive Swagger UI**: `http://localhost:8000/docs`
+* **Alternative ReDoc**: `http://localhost:8000/redoc`
+
+#### Option C: Frontend React PWA (Development Mode)
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-PWA available at: **`http://localhost:3000`**
+* **PWA Web Portal**: Open **`http://localhost:3000`** in your browser (proxies requests to FastAPI backend on port 8000).
+
+---
+
+### Step 6: Run Automated Test Suites
+
+Verify all modules and statutory verification engines locally:
+
+```bash
+# 1. Advanced 7-Subsystem Pipeline Tests
+python backend/test_advanced_pipeline.py
+
+# 2. Forensic Accuracy, Decision Traces & Section 63 BSA Tests
+python backend/test_accuracy_and_justification.py
+
+# 3. Statutory Rules Compliance Verification Tests
+python backend/test_compliance.py
+
+# 4. OpenCV Preprocessing & Grounded OCR Verification Tests
+python backend/test_opencv_gemini_pipeline.py
+
+# 5. Bounding Box & Label Spatial Mapping Tests
+python backend/test_boxes.py
+```
+
+---
+
+## 💻 Running in Different IDE Platforms
+
+### 1. Visual Studio Code (VS Code) & Cursor / Antigravity
+
+This repository includes pre-configured debugging profiles in [`.vscode/launch.json`](.vscode/launch.json).
+
+#### Option A: One-Click Run & Debug (F5)
+1. **Open the Project**: In VS Code, open the root `packaging-compliance-main` directory (`File` > `Open Folder...`).
+2. **Select Interpreter**:
+   - Press `Ctrl + Shift + P` (or `Cmd + Shift + P` on macOS).
+   - Type and select: **`Python: Select Interpreter`**.
+   - Choose the virtual environment created in Step 2 (`./venv/Scripts/python.exe` on Windows or `./venv/bin/python` on Linux/macOS).
+3. **Launch via Run & Debug**:
+   - Open the **Run and Debug** view (`Ctrl + Shift + D`).
+   - Select one of the presets from the configuration dropdown:
+     - 🌟 **`Streamlit: Packaging Compliance Workbench`** — Automatically launches the Streamlit inspection UI on port 8501.
+     - ⚡ **`FastAPI: Compliance REST API`** — Starts the REST server on port 8000 with auto-reload and Swagger docs.
+     - 🚀 **`FastAPI: WSGI/ASGI Runner`** — Starts the unified cloud-compatible WSGI runner.
+     - 🧪 **`Test: Advanced Subsystem Pipeline`** — Executes automated pipeline verification.
+     - 🔬 **`Test: Forensic Accuracy & BSA Certificate`** — Runs full zero-error benchmark battery and BSA certificates.
+   - Press **`F5`** (or click the green **Play** button).
+
+#### Option B: Using VS Code Integrated Terminal
+1. Open the integrated terminal: ``Ctrl + ` `` (Backtick).
+2. Activate your virtual environment:
+   - Windows PowerShell: `.\venv\Scripts\Activate.ps1`
+   - Linux / macOS: `source venv/bin/activate`
+3. Launch your desired service:
+   - **Streamlit**: `streamlit run backend/main.py`
+   - **FastAPI**: `uvicorn api:app --app-dir backend --port 8000 --reload`
+4. *To run frontend concurrently*: Click the **Split Terminal** button (`Ctrl + Shift + 5`), then run:
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+
+---
+
+### 2. PyCharm / JetBrains IDEs
+
+1. **Open Project**: Launch PyCharm and open the `packaging-compliance-main` folder.
+2. **Set Python Interpreter**:
+   - Go to **Settings** (`Ctrl + Alt + S` on Windows/Linux or `Cmd + ,` on macOS) > **Project: packaging-compliance-main** > **Python Interpreter**.
+   - Click **Add Interpreter** > **Add Local Interpreter...** > choose **Existing**.
+   - Browse to your virtual environment binary (`venv/Scripts/python.exe` or `venv/bin/python`) and click **OK**.
+3. **Configure Run Configurations**:
+   - **For Streamlit Workbench**:
+     - Go to **Run** > **Edit Configurations...** > click **`+`** > select **Python**.
+     - Set **Script Path** to the `streamlit` executable inside `venv/Scripts/` (or choose **Module name**: `streamlit`).
+     - **Parameters**: `run backend/main.py`.
+     - **Working directory**: Project root folder.
+     - Click **Apply** & **Run**.
+   - **For FastAPI REST Server**:
+     - Click **`+`** > select **Python**.
+     - Choose **Module name**: `uvicorn`.
+     - **Parameters**: `api:app --app-dir backend --port 8000 --reload`.
+     - **Working directory**: Project root folder.
+     - Click **Apply** & **Run**.
+
+---
+
+### 3. General IDEs (Sublime Text, Eclipse, Vim, etc.)
+1. Open your IDE's integrated terminal or system console.
+2. Ensure your virtual environment is active.
+3. Execute `streamlit run backend/main.py` for the UI or `uvicorn api:app --app-dir backend --port 8000 --reload` for the API.
 
 ---
 

@@ -5,6 +5,14 @@ Verification Test for OpenCV Preprocessing, Grounding & Zero-Hallucination Pipel
 import sys
 import os
 import io
+
+if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
