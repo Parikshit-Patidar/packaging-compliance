@@ -12,7 +12,12 @@ from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 import io
 import os
+import sys
 import json
+
+# Prevent Windows Controlled Folder Access (CFA) __pycache__ FileNotFoundError
+sys.dont_write_bytecode = True
+os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
 import base64
 import secrets
 from datetime import datetime
@@ -1058,4 +1063,13 @@ def health_check():
 # Mount static assets directory
 if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    host = os.environ.get("HOST", "0.0.0.0")
+    print(f"Starting Legal Metrology Compliance API on http://{host}:{port}")
+    uvicorn.run("api:app", host=host, port=port, reload=True)
+
 

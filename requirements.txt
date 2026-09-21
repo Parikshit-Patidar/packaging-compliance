@@ -14,3 +14,4 @@ google-generativeai>=0.8.0
 gunicorn>=21.2.0
 a2wsgi>=1.10.0
 numpy>=1.24.0
+winocr>=0.0.15; sys_platform == 'win32'

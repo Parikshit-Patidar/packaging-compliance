@@ -120,19 +120,28 @@ You can configure your Google Gemini API Key via an environment variable or ente
 
 #### Option A: Launch Streamlit Interactive Testing Workbench (Recommended for UI Testing)
 ```bash
+# Universal command (works on all computers & IDE consoles):
+python backend/main.py
+
+# Or via Streamlit CLI:
 streamlit run backend/main.py
+# (or: python -m streamlit run backend/main.py)
 ```
 * **Interactive UI**: Open **`http://localhost:8501`** in your browser.
 * Access live calibration, 3D de-warping, QR harmonization, zero-error benchmarks, and PDF audit generation.
 
-#### Option B: Launch FastAPI REST Server
+#### Option B: Launch FastAPI REST Server & Web Inspection Portal
 ```bash
+# Universal command (works on all computers):
+python wsgi.py
+
+# Or run backend/api.py directly:
+python backend/api.py
+
+# Or via Uvicorn CLI:
 uvicorn api:app --app-dir backend --host 0.0.0.0 --port 8000 --reload
 ```
-*Or via the WSGI/ASGI runner:*
-```bash
-python wsgi.py
-```
+* **Web Inspection Portal**: `http://localhost:8000`
 * **API Base URL**: `http://localhost:8000`
 * **Interactive Swagger UI**: `http://localhost:8000/docs`
 * **Alternative ReDoc**: `http://localhost:8000/redoc`
@@ -198,8 +207,8 @@ This repository includes pre-configured debugging profiles in [`.vscode/launch.j
    - Windows PowerShell: `.\venv\Scripts\Activate.ps1`
    - Linux / macOS: `source venv/bin/activate`
 3. Launch your desired service:
-   - **Streamlit**: `streamlit run backend/main.py`
-   - **FastAPI**: `uvicorn api:app --app-dir backend --port 8000 --reload`
+   - **Streamlit**: `python backend/main.py` (or `streamlit run backend/main.py`)
+   - **FastAPI**: `python wsgi.py` (or `python backend/api.py` or `uvicorn api:app --app-dir backend --port 8000 --reload`)
 4. *To run frontend concurrently*: Click the **Split Terminal** button (`Ctrl + Shift + 5`), then run:
    ```bash
    cd frontend

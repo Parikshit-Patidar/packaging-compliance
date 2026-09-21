@@ -12,9 +12,24 @@ Features:
 """
 
 import streamlit as st
+import os
+import sys
+
+# Prevent Windows Controlled Folder Access (CFA) __pycache__ FileNotFoundError
+sys.dont_write_bytecode = True
+os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+
+# Auto-launch with Streamlit CLI if invoked directly via bare Python (e.g. python backend/main.py)
+if not getattr(st, "_is_running_with_streamlit", False):
+    try:
+        import streamlit.web.cli as stcli
+        sys.argv = ["streamlit", "run", os.path.abspath(__file__)] + sys.argv[1:]
+        sys.exit(stcli.main())
+    except Exception as _st_err:
+        print("To run the Streamlit Workbench: python -m streamlit run backend/main.py")
+
 import pandas as pd
 from PIL import Image
-import os
 import json
 import io
 from datetime import datetime

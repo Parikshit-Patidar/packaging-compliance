@@ -4,6 +4,11 @@
  * Scale Calibration, Rule Audits, and PDF Report Downloads.
  */
 
+// Safe fallback so offline or delayed CDN loading never throws ReferenceError
+if (typeof window.lucide === 'undefined') {
+  window.lucide = { createIcons: function() {} };
+}
+
 let selectedFile = null;
 let cameraStream = null;
 let lastAuditResult = null;
@@ -14,13 +19,23 @@ let currentZoom = 1.0;
 let currentDeclarationBoxes = [];
 let currentImageDimensions = { width: 1000, height: 1000 };
 
+function refreshIcons() {
+  if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') {
+    try {
+      lucide.createIcons();
+    } catch (e) {
+      console.warn('Lucide icon notice:', e);
+    }
+  }
+}
+
 // Initialize on DOM Ready
 document.addEventListener('DOMContentLoaded', () => {
   setupDropzone();
   checkAiStatus();
   initAuth();
   initOnboarding();
-  lucide.createIcons();
+  refreshIcons();
 });
 
 // ============================================================================
@@ -1820,9 +1835,9 @@ function toggleKeyVisibility() {
     if (icon) icon.setAttribute('data-lucide', 'eye-off');
   } else {
     inp.type = 'password';
-    if (icon) icon.setAttribute('data-lucide', 'eye-off');
+    if (icon) icon.setAttribute('data-lucide', 'eye');
   }
-  if (window.lucide) lucide.createIcons();
+  refreshIcons();
 }
 
 async function testApiKey() {

@@ -1685,6 +1685,8 @@
       </div>
 
     </div>
+  </div>
+
   <!-- Vision Engine & Gemini AI Key Configuration Modal -->
   <div id="apiKeyModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-5 border border-slate-200 my-auto">
@@ -1826,8 +1828,10 @@
 
   <script src="/static/app.js"></script>
   <script>
-    // Initialize Lucide icons
-    lucide.createIcons();
+    // Initialize Lucide icons safely
+    if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') {
+      try { lucide.createIcons(); } catch (e) { console.warn('Lucide notice:', e); }
+    }
   </script>
 </body>
 </html>

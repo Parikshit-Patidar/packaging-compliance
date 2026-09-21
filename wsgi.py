@@ -5,6 +5,10 @@ Provides native FastAPI ASGI callable for Uvicorn and Gunicorn UvicornWorker.
 import os
 import sys
 
+# Prevent Windows Controlled Folder Access (CFA) __pycache__ FileNotFoundError
+sys.dont_write_bytecode = True
+os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+
 # Ensure backend directory is in sys.path
 backend_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "backend")
 if backend_path not in sys.path:
