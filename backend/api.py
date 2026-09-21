@@ -72,7 +72,8 @@ from ocr_service import (
 from benchmark_service import BenchmarkService
 from config import (
     get_gemini_api_key,
-    set_gemini_api_key
+    set_gemini_api_key,
+    clear_gemini_api_key
 )
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
@@ -926,11 +927,13 @@ def get_sample_image(sample_key: str):
 
 @app.get("/api/v1/config/ai-status")
 def get_ai_status():
-    """Checks Gemini API key readiness."""
+    """Checks Gemini API key readiness and active vision engine."""
     key = get_gemini_api_key()
     return {
         "gemini_active": bool(key),
-        "key_masked": f"{key[:8]}...{key[-4:]}" if key and len(key) > 12 else None
+        "key_masked": f"{key[:8]}...{key[-4:]}" if key and len(key) > 12 else None,
+        "engine": "Google Gemini Vision AI" if key else "Windows Hardware OCR (Multi-Pass Engine)",
+        "mode": "CLOUD_AI" if key else "LOCAL_OFFLINE"
     }
 
 
@@ -938,13 +941,72 @@ class SaveKeyRequest(BaseModel):
     api_key: str
 
 
+class TestKeyRequest(BaseModel):
+    api_key: Optional[str] = None
+
+
 @app.post("/api/v1/config/gemini-key")
 def update_gemini_key(req: SaveKeyRequest):
     """Saves Gemini API key permanently into persistent storage."""
     if not req.api_key or len(req.api_key.strip()) < 8:
-        raise HTTPException(status_code=400, detail="Invalid API key")
+        raise HTTPException(status_code=400, detail="Invalid API key format")
     set_gemini_api_key(req.api_key.strip())
-    return {"status": "SUCCESS", "message": "Gemini API key stored successfully"}
+    return {
+        "status": "SUCCESS",
+        "message": "Gemini API key stored successfully",
+        "key_masked": f"{req.api_key.strip()[:8]}...{req.api_key.strip()[-4:]}"
+    }
+
+
+@app.delete("/api/v1/config/gemini-key")
+def remove_gemini_key():
+    """Clears stored Gemini API key and reverts to offline Windows Hardware OCR."""
+    clear_gemini_api_key()
+    return {
+        "status": "SUCCESS",
+        "message": "API key cleared. System reverted to Offline Local Hardware OCR."
+    }
+
+
+@app.post("/api/v1/config/test-key")
+def test_gemini_key(req: TestKeyRequest):
+    """Tests an API key live against Google Gemini 2.5 Flash."""
+    key_to_test = req.api_key.strip() if req.api_key and req.api_key.strip() else get_gemini_api_key()
+    if not key_to_test or len(key_to_test) < 8:
+        return {
+            "valid": False,
+            "message": "No API key provided to test. Please enter a valid Gemini key."
+        }
+
+    try:
+        from google import genai
+        from google.genai import types
+        client = genai.Client(api_key=key_to_test, http_options=types.HttpOptions(timeout=10000))
+        resp = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents="State OK if you can read this.",
+            config=types.GenerateContentConfig(max_output_tokens=10)
+        )
+        return {
+            "valid": True,
+            "model": "gemini-2.5-flash",
+            "message": "Connected successfully to Google Gemini 2.5 Flash Vision AI."
+        }
+    except Exception as e:
+        err_msg = str(e)
+        if "401" in err_msg or "UNAUTHENTICATED" in err_msg or "ACCOUNT_STATE_INVALID" in err_msg:
+            clean_err = "401 Unauthenticated: The API key is invalid or its service account is disabled."
+        elif "API_KEY_INVALID" in err_msg or "400" in err_msg:
+            clean_err = "Invalid API Key: Please verify the key string copied from Google AI Studio."
+        elif "RESOURCE_EXHAUSTED" in err_msg or "429" in err_msg:
+            clean_err = "429 Rate Limit: Quota exhausted for this API key."
+        else:
+            clean_err = f"Connection failed: {err_msg[:120]}"
+        return {
+            "valid": False,
+            "error": clean_err,
+            "message": clean_err
+        }
 
 
 LOGO_PATH = os.path.join(STATIC_DIR, "logo.png")

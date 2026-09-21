@@ -493,9 +493,11 @@ class LegalMetrologyComplianceEngine:
         date_valid = False
         if date_str:
             date_patterns = [
-                r"\b(0[1-9]|1[0-2])[\/\-\.\s](20\d{2}|\d{2})\b",
+                r"\b(0?[1-9]|[12][0-9]|3[01])[\/\-\.\s](0?[1-9]|1[0-2])[\/\-\.\s](20\d{2}|\d{2})\b",
+                r"\b(0?[1-9]|[12][0-9]|3[01])[\/\-\.\s]+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\/\-\.\s,]+(20\d{2}|\d{2})\b",
+                r"\b(0?[1-9]|1[0-2])[\/\-\.\s](20\d{2}|\d{2})\b",
                 r"\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\/\-\.\s,]+(20\d{2}|\d{2})\b",
-                r"\b(20\d{2})[\/\-\.](0[1-9]|1[0-2])\b"
+                r"\b(20\d{2})[\/\-\.](0?[1-9]|1[0-2])\b"
             ]
             for p in date_patterns:
                 if re.search(p, date_str.lower()):

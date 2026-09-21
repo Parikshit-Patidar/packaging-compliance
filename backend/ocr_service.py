@@ -557,11 +557,17 @@ def reconcile_and_perfect_declarations(
 # 2. LOCAL WINDOWS NATIVE HARDWARE OCR (OFFLINE ACCURACY ENGINE)
 # ============================================================================
 
-def run_local_windows_ocr(image: Image.Image) -> Tuple[str, List[Dict[str, Any]]]:
+def run_local_windows_ocr(
+    image: Image.Image,
+    roi_crop: Optional[Image.Image] = None,
+    roi_bbox: Optional[Tuple[int, int, int, int]] = None
+) -> Tuple[str, List[Dict[str, Any]]]:
     """
-    Executes Windows 10/11 built-in local hardware-accelerated OCR.
+    Executes Windows 10/11 built-in local hardware-accelerated OCR with Multi-Pass Fusion:
+    - Pass 1: Pristine original image preserving fine font legibility
+    - Pass 2: High-resolution Declaration Panel (ROI) crop for small statutory print (dates, batch, consumer care)
+    - Pass 3: Adaptive contrast & inverted passes if text is sparse or on reflective foil
     Uses thread isolation with dedicated asyncio event loop to prevent event loop collision.
-    Extracts verbatim text lines and exact spatial bounding boxes directly from the image.
     """
     if not HAS_WINOCR:
         return "", []
@@ -576,72 +582,109 @@ def run_local_windows_ocr(image: Image.Image) -> Tuple[str, List[Dict[str, Any]]
                 loop.close()
 
         with ThreadPoolExecutor(max_workers=1) as executor:
-            return executor.submit(_worker).result(timeout=20)
+            return executor.submit(_worker).result(timeout=25)
 
     try:
         proc_img = ImageOps.exif_transpose(image)
         if proc_img.mode != "RGB":
             proc_img = proc_img.convert("RGB")
 
-        # First pass: original image
-        res = _execute_winocr(proc_img)
-        lines_info = []
-        if res and res.lines:
-            raw_text = "\n".join([line.text.strip() for line in res.lines if line.text.strip()])
-            for line in res.lines:
-                words = []
-                for w in line.words:
-                    r = w.bounding_rect
-                    words.append({"text": w.text, "box": (int(r.x), int(r.y), int(r.width), int(r.height))})
-                lines_info.append({"text": line.text, "words": words})
-        else:
-            raw_text = res.text.strip() if res and res.text else ""
+        # Resize if overly large for fast OCR while retaining sharpness
+        if max(proc_img.size) > 2000:
+            proc_img.thumbnail((2000, 2000), Image.Resampling.LANCZOS)
 
-        # Second pass (fallback): If text is very short/sparse, enhance contrast and retry
-        if len(raw_text) < 15:
-            gray_enhanced = ImageOps.autocontrast(proc_img.convert("L")).convert("RGB")
-            res_enh = _execute_winocr(gray_enhanced)
-            if res_enh and res_enh.lines and len(res_enh.text.strip()) > len(raw_text):
-                raw_text = "\n".join([line.text.strip() for line in res_enh.lines if line.text.strip()])
-                lines_info = []
-                for line in res_enh.lines:
+        # Pass 1: Original clean image
+        res_full = _execute_winocr(proc_img)
+        lines_info = []
+        seen_texts = set()
+
+        if res_full and res_full.lines:
+            for line in res_full.lines:
+                clean_l = line.text.strip()
+                if clean_l and clean_l.lower() not in seen_texts:
+                    seen_texts.add(clean_l.lower())
                     words = []
                     for w in line.words:
                         r = w.bounding_rect
                         words.append({"text": w.text, "box": (int(r.x), int(r.y), int(r.width), int(r.height))})
                     lines_info.append({"text": line.text, "words": words})
 
-        # Third pass: Inverted contrast (white text on dark/transparent plastic or metallic foil)
-        if len(raw_text) < 15:
+        # Pass 2: Zoomed Declaration Panel (ROI) Crop if present
+        if roi_crop:
+            try:
+                roi_proc = ImageOps.exif_transpose(roi_crop)
+                if roi_proc.mode != "RGB":
+                    roi_proc = roi_proc.convert("RGB")
+                if min(roi_proc.size) < 300:
+                    # Enlarge tiny crops so small characters become legible to OCR
+                    scale_factor = 2.0
+                    roi_proc = roi_proc.resize((int(roi_proc.width * scale_factor), int(roi_proc.height * scale_factor)), Image.Resampling.LANCZOS)
+                else:
+                    scale_factor = 1.0
+
+                res_roi = _execute_winocr(roi_proc)
+                if res_roi and res_roi.lines:
+                    rx0, ry0 = (roi_bbox[0], roi_bbox[1]) if roi_bbox else (0, 0)
+                    for line in res_roi.lines:
+                        clean_l = line.text.strip()
+                        if clean_l and clean_l.lower() not in seen_texts and len(clean_l) >= 2:
+                            seen_texts.add(clean_l.lower())
+                            words = []
+                            for w in line.words:
+                                r = w.bounding_rect
+                                wx = rx0 + int(r.x / scale_factor)
+                                wy = ry0 + int(r.y / scale_factor)
+                                ww = int(r.width / scale_factor)
+                                wh = int(r.height / scale_factor)
+                                words.append({"text": w.text, "box": (wx, wy, ww, wh)})
+                            lines_info.append({"text": line.text, "words": words})
+            except Exception as roi_ocr_err:
+                print("ROI OCR pass notice:", roi_ocr_err)
+
+        raw_text = "\n".join([line["text"].strip() for line in lines_info if line.get("text")])
+
+        # Pass 3: Autocontrast retry if text is very short/sparse
+        if len(raw_text) < 25:
+            gray_enhanced = ImageOps.autocontrast(proc_img.convert("L")).convert("RGB")
+            res_enh = _execute_winocr(gray_enhanced)
+            if res_enh and res_enh.lines:
+                for line in res_enh.lines:
+                    clean_l = line.text.strip()
+                    if clean_l and clean_l.lower() not in seen_texts:
+                        seen_texts.add(clean_l.lower())
+                        words = [{"text": w.text, "box": (int(w.bounding_rect.x), int(w.bounding_rect.y), int(w.bounding_rect.width), int(w.bounding_rect.height))} for w in line.words]
+                        lines_info.append({"text": line.text, "words": words})
+                raw_text = "\n".join([line["text"].strip() for line in lines_info if line.get("text")])
+
+        # Pass 4: Inverted contrast (light text on dark metallic/plastic background)
+        if len(raw_text) < 25:
             try:
                 inverted = ImageOps.invert(proc_img.convert("L")).convert("RGB")
                 res_inv = _execute_winocr(inverted)
-                if res_inv and res_inv.lines and len(res_inv.text.strip()) > len(raw_text):
-                    raw_text = "\n".join([line.text.strip() for line in res_inv.lines if line.text.strip()])
-                    lines_info = []
+                if res_inv and res_inv.lines:
                     for line in res_inv.lines:
-                        words = []
-                        for w in line.words:
-                            r = w.bounding_rect
-                            words.append({"text": w.text, "box": (int(r.x), int(r.y), int(r.width), int(r.height))})
-                        lines_info.append({"text": line.text, "words": words})
+                        clean_l = line.text.strip()
+                        if clean_l and clean_l.lower() not in seen_texts:
+                            seen_texts.add(clean_l.lower())
+                            words = [{"text": w.text, "box": (int(w.bounding_rect.x), int(w.bounding_rect.y), int(w.bounding_rect.width), int(w.bounding_rect.height))} for w in line.words]
+                            lines_info.append({"text": line.text, "words": words})
+                    raw_text = "\n".join([line["text"].strip() for line in lines_info if line.get("text")])
             except Exception:
                 pass
 
-        # Fourth pass: 90-degree rotation in case smartphone photo was taken sideways
-        if len(raw_text) < 15:
+        # Pass 5: 90-degree rotation if smartphone photo was taken in sideways landscape orientation
+        if len(raw_text) < 20:
             try:
                 rot90 = proc_img.rotate(90, expand=True)
                 res_rot = _execute_winocr(rot90)
                 if res_rot and res_rot.lines and len(res_rot.text.strip()) > len(raw_text):
-                    raw_text = "\n".join([line.text.strip() for line in res_rot.lines if line.text.strip()])
                     lines_info = []
                     for line in res_rot.lines:
-                        words = []
-                        for w in line.words:
-                            r = w.bounding_rect
-                            words.append({"text": w.text, "box": (int(r.x), int(r.y), int(r.width), int(r.height))})
-                        lines_info.append({"text": line.text, "words": words})
+                        clean_l = line.text.strip()
+                        if clean_l:
+                            words = [{"text": w.text, "box": (int(w.bounding_rect.x), int(w.bounding_rect.y), int(w.bounding_rect.width), int(w.bounding_rect.height))} for w in line.words]
+                            lines_info.append({"text": line.text, "words": words})
+                    raw_text = "\n".join([line["text"].strip() for line in lines_info if line.get("text")])
             except Exception:
                 pass
 
@@ -659,121 +702,194 @@ def parse_statutory_declarations_from_text(text: str) -> PackagingDeclarations:
     """
     High-precision regex parser extracting Legal Metrology declarations from raw OCR text.
     Handles Indian packaging patterns:
-    - MRP syntax: 'MRP Rs. 20', '₹ 50.00', 'INCL. OF ALL TAXES'
-    - Net quantity: '50 gms', '100g', '500 ml', '1 L', '1 kg'
-    - Dates: 'MFD: 08/2026', 'PKD: AUG-26', 'USE BY 02/2027'
-    - Customer care: 'Customer Care: 1800-XXX-XXXX', emails
-    - Manufacturing details: 'Mfd by: ...', 'Marketed by: ...'
-    Leaves unobserved fields as None rather than generating synthetic mock defaults.
+    - MRP syntax: 'MRP Rs. 20', '₹ 50.00', 'M.R.P. (Incl. of all taxes) ₹ 45.00', 'INCL. OF ALL TAXES'
+    - Net quantity: '50 gms', '100g', '500 ml', '1 L', '1 kg', 'Net Wt. (When Packed) : 50 g'
+    - Dates: 'MFD: 15/08/2026', 'PKD: 08/2026', 'AUG-26', 'USE BY 02/2027', 'Best Before 6 Months'
+    - Customer care: 'Customer Care: 1800-XXX-XXXX', '1800 11 2244', emails, mobile/landlines
+    - Manufacturing details: 'Mfd by: ...', 'Marketed by: ...', postal PIN codes, premises addresses
+    - Unit Sale Price: 'USP: ₹ 0.30 / g', 'Rs. 1.25 / ml'
+    - FSSAI License: 'Lic. No. 10014022002759'
     """
     lines = [line.strip() for line in text.split("\n") if line.strip()]
     full_text = " " + " ".join(lines) + " "
 
-    # 1. Product / Brand Name (First prominent non-metadata line)
+    # 1. Product / Brand Name
+    disallowed_keywords = [
+        "mrp", "max", "retail", "price", "rs", "₹", "inr", "net", "wt", "weight", "qty", "quantity",
+        "contents", "batch", "lot", "b.no", "mfd", "mfg", "exp", "pkd", "packed", "use by", "best before",
+        "tel", "phone", "care", "customer", "toll", "helpline", "email", "fssai", "lic", "ingredients",
+        "nutrition", "energy", "protein", "carbohydrate", "fat", "sugar", "sodium", "salt", "store in",
+        "keep in", "veg", "non-veg", "barcode", "scan", "recycle", "dispose", "country of origin", "made in",
+        "manufactured", "packed by", "marketed by", "unit sale price", "usp", "flavour", "flavor", "contain"
+    ]
+    
     product_name = None
+    generic_name = None
+
     for line in lines:
         clean_l = line.strip()
-        if len(clean_l) >= 3 and not re.match(r"^\s*(?:MRP|MAX|RS\b|₹|NET|WT|WEIGHT|QTY|BATCH|LOT|B\.NO|MFD|MFG|EXP|PKD|USE|TEL|PHONE|CARE|CUSTOMER|TOLL)", clean_l, re.IGNORECASE):
-            product_name = clean_l
-            break
+        l_low = clean_l.lower()
+        if len(clean_l) >= 3 and len(clean_l) <= 60:
+            first_word = re.split(r"[\s\:\.\-]+", l_low)[0]
+            if first_word in disallowed_keywords:
+                continue
+            if any(l_low.startswith(kw) for kw in disallowed_keywords):
+                continue
+            if re.search(r"\b(nutrition|ingredients|per 100g|energy|servings?|fssai|lic\.?\s*no)\b", l_low):
+                continue
+            if re.search(r"[a-zA-Z]", clean_l):
+                product_name = clean_l
+                break
+
     if not product_name:
         product_name = lines[0] if lines else "Scanned Commodity"
 
-    # 2. Maximum Retail Price (MRP)
-    mrp_val = None
-    mrp_raw = None
-    has_taxes = False
-
-    # Check for decimal MRP first: e.g. Rs. 55.00 or ₹ 75.50
-    mrp_dec_match = re.search(
-        r"(?:M\.?R\.?P\.?|MAX(?:IMUM)?\s*RETAIL\s*PRICE|RS\.?|₹)\s*[:=-]?\s*(?:RS\.?|₹)?\s*([0-9]+)\.([0-9]{2})",
-        full_text,
-        re.IGNORECASE
-    )
-    if mrp_dec_match:
-        try:
-            mrp_val = float(f"{mrp_dec_match.group(1)}.{mrp_dec_match.group(2)}")
-            mrp_raw = f"₹ {mrp_val:.2f}"
-        except Exception:
-            pass
+    # Generic Name detection
+    generic_m = re.search(r"(?:common\s*name|generic\s*name|commodity)\s*[:=-]?\s*([a-zA-Z\s]+?)(?=\s*(?:net|mrp|mfg|pkd|batch|rs|₹|lic|\:|\n|$))", full_text, re.IGNORECASE)
+    if generic_m:
+        generic_name = generic_m.group(1).strip()
     else:
-        # Check integer or non-decimal MRP: e.g. MRP Rs. 50 or ₹ 50/-
-        mrp_int_match = re.search(
-            r"(?:M\.?R\.?P\.?|MAX(?:IMUM)?\s*RETAIL\s*PRICE|PRICE)\s*[:=-]?\s*(?:RS\.?|₹)?\s*([0-9]+)",
-            full_text,
-            re.IGNORECASE
-        )
-        if mrp_int_match:
-            try:
-                raw_num = int(mrp_int_match.group(1))
-                # If OCR merged decimal point e.g. 5500 for 55.00
-                if raw_num > 1000 and str(raw_num).endswith("00"):
-                    mrp_val = raw_num / 100.0
-                else:
-                    mrp_val = float(raw_num)
-                mrp_raw = f"₹ {mrp_val:.2f}"
-            except Exception:
-                pass
+        cat_m = re.search(r"\b(potato\s*chips|wafers|biscuits|cookies|namkeen|bhujia|atta|flour|edible\s*oil|mustard\s*oil|refined\s*oil|soap|detergent|toothpaste|shampoo|tea|coffee|chocolate|instant\s*noodles|pasta|rice|pulses|snacks)\b", full_text, re.IGNORECASE)
+        if cat_m:
+            generic_name = cat_m.group(1).title()
+        elif len(lines) > 1 and lines[1] != product_name:
+            cand = lines[1].strip()
+            if not any(cand.lower().startswith(kw) for kw in disallowed_keywords) and len(cand) <= 40:
+                generic_name = cand
 
-    # Inclusive of all taxes check
-    if re.search(r"(?:INCL(?:USIVE)?\s*(?:OF)?\s*ALL|OF\s*ALL|OFALL)\s*TAXES", full_text, re.IGNORECASE):
-        has_taxes = True
-        if mrp_raw:
-            mrp_raw += " (incl. of all taxes)"
-
-    # 3. Net Quantity & Standard Unit (Rule 6(1)(c) & Rule 13)
-    net_val = None
-    net_unit = None
-    net_raw = None
-
-    net_pattern = re.search(
-        r"(?:NET\s*(?:WT\.?|WEIGHT|QTY\.?|QUANTITY)?|WEIGHT|CONTENTS?)\s*[:=-]?\s*([0-9]+(?:\.[0-9]+)?)\s*([a-zA-Z\.]+)",
-        full_text,
-        re.IGNORECASE
-    )
-    if not net_pattern:
-        net_pattern = re.search(r"\b([0-9]+(?:\.[0-9]+)?)\s*(gms|gm|g|kg|kgs|kilo|ml|ltr|ltrs|l|cc|N)\b", full_text, re.IGNORECASE)
-
-    if net_pattern:
-        try:
-            net_val = float(net_pattern.group(1))
-            net_unit = net_pattern.group(2).strip()
-            net_raw = f"{net_val} {net_unit}"
-        except Exception:
-            pass
-
-    # 4. Unit Sale Price (USP)
+    # 2. Unit Sale Price (USP) (Rule 6(1)(da)) - Extracted first to prevent MRP collision
     usp_val = None
     usp_unit = None
     usp_raw = None
 
     usp_pattern = re.search(
-        r"(?:U\.?S\.?P\.?|UNIT\s*SALE\s*PRICE)\s*[:=-]?\s*(?:RS\.?|₹)?\s*([0-9]+(?:\.[0-9]{1,2})?)\s*(?:PER|\/)\s*([a-zA-Z]+)",
+        r"(?:U\.?S\.?P\.?|UNIT\s*SALE\s*PRICE)[^0-9\n\r]*?(?:RS\.?|₹|INR)?\s*[:=-]?\s*(?:RS\.?|₹|INR)?\s*([0-9]+(?:\.[0-9]{1,2})?)\s*(?:PER|\/|1)?\s*([a-zA-Z]+)?",
         full_text,
         re.IGNORECASE
     )
     if usp_pattern:
         try:
             usp_val = float(usp_pattern.group(1))
-            usp_unit = usp_pattern.group(2).strip()
+            raw_u = (usp_pattern.group(2) or "g").strip().lower()
+            if raw_u in ["mi", "mil"]:
+                raw_u = "ml"
+            usp_unit = raw_u
             usp_raw = f"₹ {usp_val:.2f} / {usp_unit}"
+        except Exception:
+            pass
+
+    # 3. Maximum Retail Price (MRP)
+    mrp_val = None
+    mrp_raw = None
+    has_taxes = False
+
+    # Check each line for MRP
+    for i, line in enumerate(lines):
+        if re.search(r"\b(?:M\.?R\.?P\.?|MAX(?:IMUM)?\s*RETAIL\s*PRICE|PRICE)\b", line, re.IGNORECASE):
+            # Check if number is on the same line (excluding taxes text)
+            line_clean = line.split("taxes", 1)[-1] if "taxes" in line.lower() else line
+            line_nums = re.findall(r"[0-9]+(?:\.[0-9]{1,2})?", line_clean)
+            # Find a number that doesn't collide with USP
+            for n_str in reversed(line_nums):
+                cand = float(n_str)
+                if cand > 0 and (usp_val is None or abs(cand - usp_val) > 0.01):
+                    mrp_val = cand
+                    break
+            if mrp_val:
+                break
+            # Number might be on next lines (e.g. standalone ₹ 285.00 or : 285.00)
+            for next_l in lines[i+1:min(len(lines), i+4)]:
+                if re.search(r"^(?:[:=-]|\s*₹|\s*rs\.?|\s*inr)?\s*([0-9]+(?:\.[0-9]{2})?)$", next_l.strip(), re.IGNORECASE):
+                    cand_m = re.search(r"([0-9]+(?:\.[0-9]{2})?)", next_l)
+                    if cand_m:
+                        cand = float(cand_m.group(1))
+                        if cand > 1.0 and (usp_val is None or abs(cand - usp_val) > 0.01):
+                            mrp_val = cand
+                            break
+            if mrp_val:
+                break
+
+    # Fallback: search whole text for MRP pattern without crossing statutory headers
+    if not mrp_val:
+        mrp_pattern = re.search(
+            r"(?:M\.?R\.?P\.?|MAX(?:IMUM)?\s*RETAIL\s*PRICE)[^0-9\n\r]*?(?:RS\.?|₹|INR)?\s*[:=-]?\s*(?:RS\.?|₹|INR)?\s*([0-9]+(?:\.[0-9]{1,2})?)",
+            full_text,
+            re.IGNORECASE
+        )
+        if mrp_pattern:
+            try:
+                cand = float(mrp_pattern.group(1))
+                if usp_val is None or abs(cand - usp_val) > 0.01:
+                    mrp_val = cand
+            except Exception:
+                pass
+
+    # Fallback: standalone currency line
+    if not mrp_val:
+        for line in lines:
+            sym_match = re.search(r"^(?:[:=-]\s*)?(?:₹|rs\.?|inr)\s*[:=-]?\s*([0-9]+(?:\.[0-9]{2})?)", line.strip(), re.IGNORECASE)
+            if sym_match:
+                try:
+                    cand = float(sym_match.group(1))
+                    if 1.0 <= cand <= 25000.0 and (usp_val is None or abs(cand - usp_val) > 0.01):
+                        mrp_val = cand
+                        break
+                except Exception:
+                    pass
+
+    if mrp_val:
+        mrp_raw = f"₹ {mrp_val:.2f}"
+
+    # Inclusive of all taxes check
+    if re.search(r"(?:INCL(?:USIVE)?\s*(?:OF)?\s*ALL|OF\s*ALL|OFALL|ALL\s*TAXES)\s*TAXES?", full_text, re.IGNORECASE):
+        has_taxes = True
+        if mrp_raw and "incl" not in mrp_raw.lower():
+            mrp_raw += " (incl. of all taxes)"
+
+    # 4. Net Quantity & Standard Unit (Rule 6(1)(c) & Rule 13)
+    net_val = None
+    net_unit = None
+    net_raw = None
+
+    net_pattern = re.search(
+        r"(?:NET\s*(?:WT\.?|WEIGHT|QTY\.?|QUANTITY|CONTENTS?|VOLUME)?)[^0-9\n\r]*?[:=-]?\s*([0-9]+(?:\.[0-9]+)?)\s*([a-zA-Z\.]+)",
+        full_text,
+        re.IGNORECASE
+    )
+    if not net_pattern:
+        net_pattern = re.search(r"\b([0-9]+(?:\.[0-9]+)?)\s*(gms|gm|g|kg|kgs|kilo|ml|ltr|ltrs|l|cc|N|pieces|units)\b", full_text, re.IGNORECASE)
+
+    if net_pattern:
+        try:
+            net_val = float(net_pattern.group(1))
+            raw_unit = net_pattern.group(2).strip().rstrip(".")
+            net_unit = raw_unit
+            net_raw = f"{net_val} {net_unit}"
         except Exception:
             pass
 
     # 5. Month & Year of Manufacture / Packaging (Rule 6(1)(d))
     mfg_date = None
     date_pattern = re.search(
-        r"(?:MFG|PKD|PACKED|MANUFACTURED|MFD|DATE)\s*[:=-]?\s*([0-9]{1,2}[\/\-\.][0-9]{2,4}|[a-zA-Z]{3,9}[\s\/\-][0-9]{2,4})",
+        r"(?:MFG|PKD|PACKED|MANUFACTURED|MFD)(?:\s*[\&\.\s\w]*?DATE)?\s*[:=-]?\s*([0-3]?[0-9][\/\-\.][0-1]?[0-9][\/\-\.](?:20\d{2}|\d{2})|[0-1]?[0-9][\/\-\.](?:20\d{2}|\d{2})|[a-zA-Z]{3,9}[\s\/\-](?:20\d{2}|\d{2}))",
         full_text,
         re.IGNORECASE
     )
     if date_pattern:
         mfg_date = date_pattern.group(1).strip()
+    else:
+        generic_date = re.search(
+            r"(?:DATE|ON)\s*[:=-]?\s*([0-3]?[0-9][\/\-\.][0-1]?[0-9][\/\-\.](?:20\d{2}|\d{2})|[0-1]?[0-9][\/\-\.](?:20\d{2}|\d{2}))",
+            full_text,
+            re.IGNORECASE
+        )
+        if generic_date:
+            mfg_date = generic_date.group(1).strip()
 
-    # Expiry / Best before date
+    # Expiry Date / Best Before
     exp_date = None
     exp_pattern = re.search(
-        r"(?:EXP|EXPIRY|BEST\s*BEFORE|USE\s*BY)\s*[:=-]?\s*([0-9]{1,2}[\/\-\.][0-9]{2,4}|[a-zA-Z]{3,9}[\s\/\-][0-9]{2,4})",
+        r"(?:EXP(?:IRY)?(?:\s*DATE)?|USE\s*BY|BEST\s*BEFORE)\s*[:=-]?\s*([0-3]?[0-9][\/\-\.][0-1]?[0-9][\/\-\.](?:20\d{2}|\d{2})|[0-1]?[0-9][\/\-\.](?:20\d{2}|\d{2})|[a-zA-Z]{3,9}[\s\/\-](?:20\d{2}|\d{2})|\d+\s*months?(?:\s*(?:from|of)\s*(?:packaging|pkd|mfg|manufacture|date|packing))?)",
         full_text,
         re.IGNORECASE
     )
@@ -782,7 +898,7 @@ def parse_statutory_declarations_from_text(text: str) -> PackagingDeclarations:
 
     # Batch / Lot number
     batch_num = None
-    batch_pattern = re.search(r"(?:BATCH|LOT|B\.NO)\s*[:=-]?\s*([A-Za-z0-9\-]+)", full_text, re.IGNORECASE)
+    batch_pattern = re.search(r"(?:BATCH(?:\s*(?:NUMBER|NUM|NO\.?))?|LOT(?:\s*(?:NUMBER|NUM|NO\.?))?|B\.?NO\.?)\s*[:=-]?\s*([A-Za-z0-9\-]+)", full_text, re.IGNORECASE)
     if batch_pattern:
         batch_num = batch_pattern.group(1).strip()
 
@@ -790,42 +906,41 @@ def parse_statutory_declarations_from_text(text: str) -> PackagingDeclarations:
     phone = None
     email = None
 
-    # Toll-free 1800-XXX-XXXX or standard Indian mobile/landline numbers
-    phone_pattern = re.search(r"\b(1800[\-\s]?[0-9]{3}[\-\s]?[0-9]{4}|\+?91[\-\s]?[6-9][0-9]{9}|0[0-9]{2,4}[\-\s]?[0-9]{6,8})\b", full_text)
+    phone_pattern = re.search(r"\b(1800[\-\s]?[0-9]{2,4}[\-\s]?[0-9]{3,4}|\+?91[\-\s]?[6-9][0-9]{9}|0[0-9]{2,4}[\-\s]?[0-9]{6,8})\b", full_text)
     if not phone_pattern:
-        phone_pattern = re.search(r"(?:TEL|PHONE|HELPLINE|CARE|TOLL\s*FREE|CUSTOMER\s*CARE)\s*[:=-]?\s*([\+0-9\-\s]{8,16})", full_text, re.IGNORECASE)
+        phone_pattern = re.search(r"(?:TEL|PHONE|HELPLINE|CARE|TOLL\s*FREE|CUSTOMER\s*CARE)\s*[:=-]?\s*([\+0-9\-\s]{8,18})", full_text, re.IGNORECASE)
     if phone_pattern:
         phone = phone_pattern.group(1).strip()
 
     email_pattern = re.search(r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)", full_text)
-    if not email_pattern:
-        # Faint or merged dot after domain name
-        email_pattern = re.search(r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+[a-zA-Z0-9-.]+)", full_text)
     if email_pattern:
-        email = email_pattern.group(1).strip()
+        email = email_pattern.group(1).strip().rstrip(".")
 
     # 7. Manufacturer / Packer Details (Rule 6(1)(a))
     mfg_name = None
     mfg_addr = None
 
-    mfg_pattern = re.search(r"(?:MFD\s*BY|MANUFACTURED\s*BY|MARKETED\s*BY|PACKED\s*BY|PRODUCED\s*BY)\s*[:=-]?\s*([^\n;]+)", full_text, re.IGNORECASE)
+    mfg_pattern = re.search(
+        r"(?:MFD\s*(?:AND|\&)?\s*PKD\s*BY|MANUFACTURED\s*(?:AND|\&)?\s*PACKED\s*BY|MANUFACTURED\s*BY|MARKETED\s*BY|PACKED\s*BY|PRODUCED\s*BY|MFD\s*BY)\s*[:=-]?\s*([^\n;]+)",
+        full_text,
+        re.IGNORECASE
+    )
     if mfg_pattern:
         match_str = mfg_pattern.group(1).strip()
-        # Clean trailing contact tokens if captured on same line
-        match_str = re.split(r"(?:CUSTOMER\s*CARE|CONSUMER\s*CARE|HELPLINE|TEL\b|PHONE)", match_str, flags=re.IGNORECASE)[0].strip()
+        match_str = re.split(r"(?:CUSTOMER\s*CARE|CONSUMER\s*CARE|HELPLINE|TEL\b|PHONE|EMAIL)", match_str, flags=re.IGNORECASE)[0].strip()
         parts = [p.strip() for p in match_str.split(",") if p.strip()]
         if len(parts) > 1:
             mfg_name = parts[0]
             mfg_addr = ", ".join(parts[1:])
-        elif len(match_str) > 30:
-            mfg_name = match_str[:30].strip()
-            mfg_addr = match_str[30:].strip()
+        elif len(match_str) > 35:
+            mfg_name = match_str[:35].strip()
+            mfg_addr = match_str[35:].strip()
         else:
             mfg_name = match_str
 
     # 8. Country of Origin (Rule 6(10))
     origin = None
-    origin_pattern = re.search(r"(?:COUNTRY\s*OF\s*ORIGIN|MADE\s*IN)\s*[:=-]?\s*([a-zA-Z\s]+)", full_text, re.IGNORECASE)
+    origin_pattern = re.search(r"(?:COUNTRY\s*OF\s*ORIGIN|MADE\s*IN|PRODUCT\s*OF)\s*[:=-]?\s*([a-zA-Z\s]+)", full_text, re.IGNORECASE)
     if origin_pattern:
         origin = origin_pattern.group(1).strip()
     elif "india" in full_text.lower():
@@ -833,7 +948,7 @@ def parse_statutory_declarations_from_text(text: str) -> PackagingDeclarations:
 
     return PackagingDeclarations(
         product_name=product_name,
-        generic_name=lines[1] if len(lines) > 1 else None,
+        generic_name=generic_name,
         manufacturer_name=mfg_name,
         manufacturer_address=mfg_addr,
         net_quantity_value=net_val,
@@ -875,9 +990,10 @@ def extract_packaging_declarations(
     Master extraction function:
     1. Preprocesses packaging with OpenCV (Shadow removal, specular glare attenuation, LAB CLAHE).
     2. Segments and isolates Declaration Panel ROI crop.
-    3. If Gemini AI key available and not force_local: Runs Google Gemini Vision AI on enhanced packaging + ROI crop.
-    4. Cross-verifies extracted data against local pixel tokens via forensic grounding check.
-    5. Else: Runs Windows Native Hardware OCR + Statutory Regex Parser on enhanced image.
+    3. Executes multi-pass hardware OCR fusing whole image, zoomed ROI panel, and adaptive contrast passes.
+    4. If Gemini AI key available and not force_local: Runs Google Gemini Vision AI on packaging + ROI crop.
+    5. Cross-verifies extracted data against local pixel tokens via forensic grounding check.
+    6. Else: Parses statutory declarations from multi-pass hardware OCR text.
     Returns: (PackagingDeclarations, raw_transcript, engine_used)
     """
     # Step 1: OpenCV Computer Vision Preprocessing & ROI Localization
@@ -894,8 +1010,8 @@ def extract_packaging_declarations(
 
     key = gemini_key or get_gemini_api_key()
 
-    # Step 2: Extract local verbatim tokens for forensic grounding
-    local_text, lines_info = run_local_windows_ocr(enhanced_full)
+    # Step 2: Multi-Pass Local Windows Native Hardware OCR (fuses whole image + zoomed ROI panel)
+    local_text, lines_info = run_local_windows_ocr(image, roi_crop=roi_crop, roi_bbox=roi_bbox)
 
     # Step 3: Google Cloud / Gemini Multimodal Vision AI (Zero-Hallucination)
     if key and not force_local:
@@ -926,7 +1042,7 @@ def extract_packaging_declarations(
             model_name = getattr(dec, "_model_used", "gemini-2.5-flash")
             return dec, transcript, f"Google Gemini ({model_name}) Multimodal Vision AI (Grounded)"
 
-    # Step 4: Local Windows Hardware-Accelerated OCR Fallback
+    # Step 4: Local Windows Hardware-Accelerated OCR Extraction Fallback
     if local_text and len(local_text.strip()) >= 5:
         dec = parse_statutory_declarations_from_text(local_text)
         dec = reconcile_and_perfect_declarations(dec, local_text, local_text)
@@ -941,28 +1057,9 @@ def extract_packaging_declarations(
             "status": "LOCAL_HARDWARE_GROUNDED"
         }
         dec._lines_info = lines_info
-        return dec, local_text, "Windows Hardware OCR (OpenCV Enhanced)"
+        return dec, local_text, "Windows Hardware OCR (Multi-Pass Engine)"
 
-    # Step 5: Check benchmark sample library matching
-    for sample_k, sample_info in BENCHMARK_SAMPLES.items():
-        sample_title = sample_info.get("title", "").lower()
-        if sample_title and local_text and any(w.lower() in local_text.lower() for w in sample_title.split()[:2]):
-            import copy
-            matched_dec = copy.deepcopy(sample_info["declarations"])
-            matched_dec._roi_crop_base64 = roi_b64
-            matched_dec._roi_bbox = roi_bbox
-            matched_dec._cv_diagnostics = cv_diagnostics
-            matched_dec._grounding = {
-                "grounding_score": 100.0,
-                "is_grounded": True,
-                "verified_fields": ["Standard Verified"],
-                "unverified_fields": [],
-                "status": "STANDARD_GROUNDED"
-            }
-            matched_dec._lines_info = lines_info
-            return matched_dec, local_text or sample_info["title"], "Local Hardware OCR (Benchmark Verified)"
-
-    # Step 6: No Text Detected (Strict Non-Hallucinating Return)
+    # Step 5: No Text Detected (Strict Non-Hallucinating Return)
     empty_dec = PackagingDeclarations(
         product_name="Packaging (Text Unidentified)",
         country_of_origin="India",
@@ -977,7 +1074,7 @@ def extract_packaging_declarations(
         "grounding_score": 0.0,
         "is_grounded": False,
         "verified_fields": [],
-        "unverified_fields": ["Zero Legible Text"],
+        "unverified_fields": ["Zero Legible Text Detected"],
         "status": "UNVERIFIED"
     }
     return empty_dec, "No legible text detected on packaging. Please ensure the label is flat, well-lit, and unwrinkled.", "Local OCR (Zero Text Detected)"

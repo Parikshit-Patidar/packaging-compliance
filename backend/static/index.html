@@ -78,10 +78,10 @@
         </button>
 
         <!-- Statutory Engine Status Pill -->
-        <div id="aiStatusPill" class="flex items-center gap-1.5 sm:gap-2 bg-[#12283f] border border-emerald-500/30 px-2.5 sm:px-3 py-1.5 rounded-lg shadow-xs whitespace-nowrap shrink-0" title="Vision OCR & Statutory Rule Engine">
+        <div id="aiStatusPill" onclick="openApiKeyModal()" class="flex items-center gap-1.5 sm:gap-2 bg-[#12283f] hover:bg-[#183654] border border-emerald-500/30 hover:border-emerald-400/60 px-2.5 sm:px-3 py-1.5 rounded-lg shadow-xs whitespace-nowrap shrink-0 cursor-pointer transition group" title="Click to configure Vision AI engine & Gemini API key">
           <span id="aiStatusDot" class="pulse-dot bg-emerald-400"></span>
           <span id="aiStatusText" class="font-semibold text-emerald-300 text-[11px] hidden md:inline">Vision Engine • Online</span>
-          <i data-lucide="shield" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <i data-lucide="settings" class="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-300 transition"></i>
         </div>
 
         <!-- Dynamic User Profile Capsule (Govt Officer vs B2B Brand) -->
@@ -1682,6 +1682,119 @@
           <span>Don't show this orientation automatically again</span>
         </label>
         <span>Reopen anytime via ❓ User Guide</span>
+      </div>
+
+    </div>
+  <!-- Vision Engine & Gemini AI Key Configuration Modal -->
+  <div id="apiKeyModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-5 border border-slate-200 my-auto">
+      
+      <!-- Modal Header -->
+      <div class="flex justify-between items-start border-b border-slate-100 pb-3.5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-[#0c2033] border border-emerald-500/30 text-emerald-400 flex items-center justify-center shadow-xs shrink-0">
+            <i data-lucide="cpu" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="gov-badge gov-badge-navy text-[9px]">ENGINE SETTINGS</span>
+              <span id="modalActiveEngineBadge" class="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-mono">
+                Active: Windows Native OCR
+              </span>
+            </div>
+            <h3 class="font-bold text-slate-900 text-sm sm:text-base leading-tight mt-0.5">
+              Packaging Vision Engine & AI Key
+            </h3>
+          </div>
+        </div>
+        <button onclick="closeApiKeyModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Engine Overview Cards -->
+      <div class="space-y-2.5">
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs space-y-1.5">
+          <div class="flex items-center justify-between font-semibold text-slate-800">
+            <span class="flex items-center gap-1.5"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-600"></i> Google Gemini Vision AI</span>
+            <span id="geminiStatusLabel" class="text-[10px] font-mono text-slate-500">Not Configured</span>
+          </div>
+          <p class="text-slate-600 text-[11px] leading-relaxed">
+            Provides multimodal deep semantic reading of brand names, manufacturer premises, packaging contours, and 2D spatial bounding boxes.
+          </p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs space-y-1.5">
+          <div class="flex items-center justify-between font-semibold text-slate-800">
+            <span class="flex items-center gap-1.5"><i data-lucide="hard-drive" class="w-3.5 h-3.5 text-emerald-600"></i> Windows Native Hardware OCR</span>
+            <span class="text-[10px] font-mono text-emerald-700 font-bold bg-emerald-100/70 px-1.5 py-0.5 rounded">Always Ready (Offline)</span>
+          </div>
+          <p class="text-slate-600 text-[11px] leading-relaxed">
+            Local hardware-accelerated text extraction using multi-pass image fusion and Indian statutory regex parsing. 100% offline with zero cloud dependency.
+          </p>
+        </div>
+      </div>
+
+      <!-- Key Input Form -->
+      <div class="space-y-1.5">
+        <label for="geminiApiKeyInput" class="block text-xs font-bold text-slate-800">
+          Google Gemini API Key
+        </label>
+        <div class="relative">
+          <input 
+            type="password" 
+            id="geminiApiKeyInput" 
+            placeholder="Enter AIzaSy... key to activate Vision AI" 
+            class="w-full text-xs font-mono px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 pr-10"
+          />
+          <button 
+            type="button" 
+            onclick="toggleKeyVisibility()" 
+            class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1"
+            title="Show or hide key"
+          >
+            <i id="keyVisibilityIcon" data-lucide="eye" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <div class="flex items-center justify-between text-[11px] text-slate-500 pt-0.5">
+          <span>Get a key free at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline font-semibold">Google AI Studio</a></span>
+          <span id="currentKeyHint" class="font-mono text-[10px] text-slate-400"></span>
+        </div>
+      </div>
+
+      <!-- Live Test Feedback Box -->
+      <div id="keyTestResultBox" class="hidden p-3 rounded-lg text-xs font-medium border"></div>
+
+      <!-- Action Buttons -->
+      <div class="border-t border-slate-100 pt-3.5 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <button 
+          id="btnUseOfflineMode" 
+          onclick="useOfflineMode()" 
+          class="w-full sm:w-auto text-xs py-2 px-3 text-slate-600 hover:text-slate-900 border border-slate-300 rounded-lg hover:bg-slate-50 font-semibold transition"
+          title="Clear stored key and use offline hardware OCR"
+        >
+          Use Offline Mode
+        </button>
+        
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <button 
+            id="btnTestApiKey" 
+            onclick="testApiKey()" 
+            class="w-full sm:w-auto text-xs py-2 px-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold rounded-lg border border-slate-300 transition flex items-center justify-center gap-1.5"
+          >
+            <i data-lucide="play" class="w-3.5 h-3.5"></i>
+            <span>Test Key</span>
+          </button>
+          
+          <button 
+            id="btnSaveApiKey" 
+            onclick="saveApiKey()" 
+            class="w-full sm:w-auto text-xs py-2 px-4 bg-[#0c2033] hover:bg-[#183654] text-white font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-1.5"
+          >
+            <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>Save & Activate</span>
+          </button>
+        </div>
       </div>
 
     </div>

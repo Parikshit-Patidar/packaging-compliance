@@ -1707,38 +1707,227 @@ function viewVaultDossier(refId) {
 
 
 // ============================================================================
-// 10. SOVEREIGN AI STATUS MONITOR
+// 10. VISION ENGINE & GEMINI AI CONFIGURATION MANAGER
 // ============================================================================
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('portalToast');
+  const m = document.getElementById('toastMsg');
+  const icon = document.getElementById('toastIcon');
+  if (!t || !m) return;
+  m.textContent = msg;
+  if (icon) {
+    icon.className = isError ? 'text-rose-400' : 'text-emerald-400';
+    icon.innerHTML = `<i data-lucide="${isError ? 'alert-circle' : 'check-circle'}" class="w-4 h-4"></i>`;
+    if (window.lucide) lucide.createIcons();
+  }
+  t.classList.remove('hidden');
+  clearTimeout(window._toastTimeout);
+  window._toastTimeout = setTimeout(() => {
+    t.classList.add('hidden');
+  }, 4000);
+}
 
 async function checkAiStatus() {
   try {
     const dot = document.getElementById('aiStatusDot');
     const text = document.getElementById('aiStatusText');
+    const pill = document.getElementById('aiStatusPill');
     const res = await fetch('/api/v1/config/ai-status');
     if (res.ok) {
       const data = await res.json();
       if (data.gemini_active) {
         if (dot) dot.className = 'pulse-dot bg-emerald-400';
-        if (text) text.textContent = 'Vision Engine • Online';
+        if (text) text.textContent = 'Vision AI (Gemini) • Online';
+        if (pill) pill.title = `Active Engine: Google Gemini Vision AI (${data.key_masked || 'Active'}) — Click to configure`;
       } else {
-        if (dot) dot.className = 'pulse-dot bg-emerald-400';
-        if (text) text.textContent = 'Native OCR • Online';
+        if (dot) dot.className = 'pulse-dot bg-blue-400';
+        if (text) text.textContent = 'Native OCR (Offline) • Online';
+        if (pill) pill.title = 'Active Engine: Windows Hardware OCR (Multi-Pass Engine) — Click to configure AI Key';
       }
     } else {
-      if (dot) dot.className = 'pulse-dot bg-emerald-400';
-      if (text) text.textContent = 'Vision Engine • Online';
+      if (dot) dot.className = 'pulse-dot bg-blue-400';
+      if (text) text.textContent = 'Native OCR • Online';
     }
   } catch (e) {
     console.warn('AI status check note:', e);
   }
 }
 
-function openApiKeyModal() {
-  // Production mode: Sovereign embedded API key active
+async function openApiKeyModal() {
+  const modal = document.getElementById('apiKeyModal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+
+  // Reset feedback box
+  const resBox = document.getElementById('keyTestResultBox');
+  if (resBox) {
+    resBox.className = 'hidden p-3 rounded-lg text-xs font-medium border';
+    resBox.textContent = '';
+  }
+
+  // Load active status
+  try {
+    const res = await fetch('/api/v1/config/ai-status');
+    if (res.ok) {
+      const data = await res.json();
+      const badge = document.getElementById('modalActiveEngineBadge');
+      const label = document.getElementById('geminiStatusLabel');
+      const hint = document.getElementById('currentKeyHint');
+      const inp = document.getElementById('geminiApiKeyInput');
+
+      if (data.gemini_active) {
+        if (badge) {
+          badge.className = 'text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-mono';
+          badge.textContent = 'Active: Google Gemini Vision AI';
+        }
+        if (label) {
+          label.className = 'text-[10px] font-mono text-emerald-700 font-bold bg-emerald-100/70 px-1.5 py-0.5 rounded';
+          label.textContent = `Configured (${data.key_masked || 'Active'})`;
+        }
+        if (hint) hint.textContent = `Active: ${data.key_masked || 'Configured'}`;
+      } else {
+        if (badge) {
+          badge.className = 'text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full font-mono';
+          badge.textContent = 'Active: Windows Native Hardware OCR';
+        }
+        if (label) {
+          label.className = 'text-[10px] font-mono text-slate-500';
+          label.textContent = 'Not Configured';
+        }
+        if (hint) hint.textContent = 'No key set (Offline mode)';
+        if (inp) inp.value = '';
+      }
+    }
+  } catch (e) {
+    console.warn('Modal status load error:', e);
+  }
+
+  if (window.lucide) lucide.createIcons();
 }
 
 function closeApiKeyModal() {
-  // No-op in production
+  const modal = document.getElementById('apiKeyModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function toggleKeyVisibility() {
+  const inp = document.getElementById('geminiApiKeyInput');
+  const icon = document.getElementById('keyVisibilityIcon');
+  if (!inp) return;
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    if (icon) icon.setAttribute('data-lucide', 'eye-off');
+  } else {
+    inp.type = 'password';
+    if (icon) icon.setAttribute('data-lucide', 'eye-off');
+  }
+  if (window.lucide) lucide.createIcons();
+}
+
+async function testApiKey() {
+  const btn = document.getElementById('btnTestApiKey');
+  const inp = document.getElementById('geminiApiKeyInput');
+  const resBox = document.getElementById('keyTestResultBox');
+  const keyVal = inp ? inp.value.trim() : '';
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="animate-spin inline-block mr-1">⏳</span> Testing...';
+  }
+
+  try {
+    const res = await fetch('/api/v1/config/test-key', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ api_key: keyVal || null })
+    });
+
+    const data = await res.json();
+    if (resBox) {
+      resBox.classList.remove('hidden');
+      if (data.valid) {
+        resBox.className = 'p-3 rounded-lg text-xs font-medium border bg-emerald-50 border-emerald-200 text-emerald-800';
+        resBox.innerHTML = `<strong>Connected Successfully:</strong> ${data.message}`;
+        showToast('Gemini Vision AI connection verified!');
+      } else {
+        resBox.className = 'p-3 rounded-lg text-xs font-medium border bg-rose-50 border-rose-200 text-rose-800';
+        resBox.innerHTML = `<strong>Authentication Issue:</strong> ${data.message || 'Key invalid'}`;
+        showToast('API Key test failed', true);
+      }
+    }
+  } catch (e) {
+    if (resBox) {
+      resBox.classList.remove('hidden');
+      resBox.className = 'p-3 rounded-lg text-xs font-medium border bg-rose-50 border-rose-200 text-rose-800';
+      resBox.innerHTML = `<strong>Connection Error:</strong> Could not reach backend testing service.`;
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="play" class="w-3.5 h-3.5"></i><span>Test Key</span>';
+      if (window.lucide) lucide.createIcons();
+    }
+  }
+}
+
+async function saveApiKey() {
+  const btn = document.getElementById('btnSaveApiKey');
+  const inp = document.getElementById('geminiApiKeyInput');
+  const keyVal = inp ? inp.value.trim() : '';
+
+  if (!keyVal || keyVal.length < 8) {
+    showToast('Please enter a valid Gemini API key first', true);
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="animate-spin inline-block mr-1">⏳</span> Saving...';
+  }
+
+  try {
+    const res = await fetch('/api/v1/config/gemini-key', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ api_key: keyVal })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      showToast('Gemini Vision AI key saved & activated!');
+      await checkAiStatus();
+      setTimeout(() => {
+        closeApiKeyModal();
+      }, 700);
+    } else {
+      const err = await res.json();
+      showToast(err.detail || 'Failed to save API key', true);
+    }
+  } catch (e) {
+    showToast('Network error saving API key', true);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span>Save & Activate</span>';
+      if (window.lucide) lucide.createIcons();
+    }
+  }
+}
+
+async function useOfflineMode() {
+  try {
+    const res = await fetch('/api/v1/config/gemini-key', { method: 'DELETE' });
+    if (res.ok) {
+      showToast('Switched to 100% Offline Windows Hardware OCR');
+      const inp = document.getElementById('geminiApiKeyInput');
+      if (inp) inp.value = '';
+      await checkAiStatus();
+      await openApiKeyModal();
+    }
+  } catch (e) {
+    showToast('Error resetting to offline mode', true);
+  }
 }
 
 

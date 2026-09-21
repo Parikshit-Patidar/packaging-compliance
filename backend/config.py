@@ -66,3 +66,17 @@ def set_gemini_api_key(key: str):
     if key and len(key.strip()) > 5:
         save_config({"gemini_api_key": key.strip()})
         os.environ["GEMINI_API_KEY"] = key.strip()
+
+def clear_gemini_api_key():
+    p = get_config_path()
+    try:
+        curr = load_config()
+        curr.pop("gemini_api_key", None)
+        with open(p, "w", encoding="utf-8") as f:
+            json.dump(curr, f, indent=2)
+        if "GEMINI_API_KEY" in os.environ:
+            del os.environ["GEMINI_API_KEY"]
+        if "GOOGLE_API_KEY" in os.environ:
+            del os.environ["GOOGLE_API_KEY"]
+    except Exception as e:
+        print("Failed to clear gemini key:", e)
