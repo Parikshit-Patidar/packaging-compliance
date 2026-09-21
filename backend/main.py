@@ -137,8 +137,8 @@ st.markdown("""
 # Top Banner
 st.markdown("""
 <div class="main-header">
-    <h1>⚖️ Legal Metrology Compliance Inspection Platform</h1>
-    <p>AI-Powered Statutory Packaging Audit, Reference Object Calibration & 3D De-Warping Engine (Rules 2011 & Amendments)</p>
+    <h1>Legal Metrology Compliance Inspection Platform</h1>
+    <p>Ministry of Consumer Affairs • Statutory Packaging Adjudication & Calibration System (Rules 2011 & Amendments)</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -147,30 +147,40 @@ st.markdown("""
 # SIDEBAR
 # ============================================================================
 
-st.sidebar.markdown("### ⚖️ Inspection Control Center")
+st.sidebar.markdown("### Inspection Control Center")
+
+MODE_INSPECT = "Packaging Inspection Station"
+MODE_BENCHMARK = "Accuracy & Reliability Benchmark Station"
+MODE_CALIBRATE = "Pixel-to-mm Calibration Module"
+MODE_DEWARP = "3D Surface De-Warping & Spatial OCR"
+MODE_QR = "Hybrid QR Harmonization"
+MODE_B2B = "B2B Pre-Print Artwork Studio"
+MODE_VAULT = "Inspection Dossiers & Vault"
+MODE_ANALYTICS = "Enforcement Analytics"
+MODE_NOTICE = "Section 36 Notice Generator"
 
 nav_choice = st.sidebar.radio(
     "Select Workstation Mode",
     [
-        "📸 Live Packaging Inspection Station",
-        "🎯 Accuracy & Reliability Benchmark Station",
-        "📏 Pixel-to-mm Calibration Module",
-        "🌀 3D Surface De-Warping & Spatial OCR",
-        "🔗 Hybrid QR Harmonization",
-        "💼 B2B Pre-Print Artwork Sandbox",
-        "🗄️ Inspection Dossiers & Vault",
-        "📊 Enforcement Analytics",
-        "📜 Section 36 Notice Generator"
+        MODE_INSPECT,
+        MODE_BENCHMARK,
+        MODE_CALIBRATE,
+        MODE_DEWARP,
+        MODE_QR,
+        MODE_B2B,
+        MODE_VAULT,
+        MODE_ANALYTICS,
+        MODE_NOTICE
     ]
 )
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("#### 👮 Enforcement Officer Profile")
+st.sidebar.markdown("#### Enforcement Officer Profile")
 inspector_name = st.sidebar.text_input("Officer Name", value="Inspector Rajesh Kumar (DL-04)")
 inspection_location = st.sidebar.text_input("Jurisdiction", value="Central Delhi District")
 store_name = st.sidebar.text_input("Premises / Retailer", value="Apex Mega Mart, Connaught Place")
 
-st.sidebar.markdown("#### 📍 Geotagging Parameters")
+st.sidebar.markdown("#### Geotagging Parameters")
 geo_lat = st.sidebar.number_input("Inspection Latitude (°N)", value=28.6139, format="%.4f")
 geo_lng = st.sidebar.number_input("Inspection Longitude (°E)", value=77.2090, format="%.4f")
 
@@ -179,8 +189,8 @@ geo_lng = st.sidebar.number_input("Inspection Longitude (°E)", value=77.2090, f
 # MODE 1: LIVE PACKAGING INSPECTION STATION
 # ============================================================================
 
-if nav_choice == "📸 Live Packaging Inspection Station":
-    st.subheader("📸 AI Packaging Inspection & Automated Statutory Audit")
+if nav_choice in (MODE_INSPECT, "📸 Live Packaging Inspection Station"):
+    st.subheader("Packaging Inspection & Automated Statutory Audit")
     st.markdown("Upload packaging photograph or capture label image to automatically run AI text extraction, reference object calibration, and Legal Metrology rule verification.")
 
     # ------------------------------------------------------------------------
@@ -567,8 +577,8 @@ if nav_choice == "📸 Live Packaging Inspection Station":
 # ACCURACY & RELIABILITY BENCHMARK STATION
 # ============================================================================
 
-elif nav_choice == "🎯 Accuracy & Reliability Benchmark Station":
-    st.subheader("🎯 Statutory Accuracy, Grounding & Evidentiary Justification Station")
+elif nav_choice in (MODE_BENCHMARK, "🎯 Accuracy & Reliability Benchmark Station"):
+    st.subheader("Statutory Accuracy, Grounding & Evidentiary Justification Station")
     st.markdown(
         "**Independent Empirical Testing & Mathematical Non-Repudiation Engine** under the "
         "**Legal Metrology Act, 2009** and **Section 63 of Bharatiya Sakshya Adhiniyam, 2023**."
@@ -667,7 +677,7 @@ elif nav_choice == "🎯 Accuracy & Reliability Benchmark Station":
 # MODE 2: PIXEL-TO-MM CALIBRATION MODULE
 # ============================================================================
 
-elif nav_choice == "📏 Pixel-to-mm Calibration Module":
+elif nav_choice in (MODE_CALIBRATE, "📏 Pixel-to-mm Calibration Module"):
     st.subheader("📏 Pixel-to-Millimeter Calibration & Font Measurement Pipeline")
     st.markdown("Statutory Reference: **Rule 9 & Schedule II, Legal Metrology (Packaged Commodities) Rules, 2011**")
     st.markdown("Calculates precise pixel-to-millimeter ratios (PPM) using a standard physical reference object (Credit Card or Indian Coin) to measure physical font heights and PDP areas.")
@@ -723,7 +733,7 @@ elif nav_choice == "📏 Pixel-to-mm Calibration Module":
 # MODE 3: 3D DE-WARPING & SPATIAL OCR
 # ============================================================================
 
-elif nav_choice == "🌀 3D Surface De-Warping & Spatial OCR":
+elif nav_choice in (MODE_DEWARP, "🌀 3D Surface De-Warping & Spatial OCR"):
     st.subheader("🌀 3D Cylindrical Packaging De-Warping & Grounded Spatial OCR")
     st.markdown("Digitally unrolls curved bottles, cans, and flexible pouches to remove perspective foreshortening and extract verifiable on-pack bounding boxes.")
 
@@ -757,7 +767,7 @@ elif nav_choice == "🌀 3D Surface De-Warping & Spatial OCR":
 # MODE 4: HYBRID QR HARMONIZATION
 # ============================================================================
 
-elif nav_choice == "🔗 Hybrid QR Harmonization":
+elif nav_choice in (MODE_QR, "🔗 Hybrid QR Harmonization"):
     st.subheader("🔗 Hybrid QR Harmonization & Digital Disclosure Cross-Verification")
     st.markdown("Audits consistency between physical packaging declarations and digital QR disclosures under the Legal Metrology Electronic Disclosure Amendments.")
 
@@ -803,7 +813,7 @@ elif nav_choice == "🔗 Hybrid QR Harmonization":
 # MODE 5: B2B PRE-PRINT ARTWORK SANDBOX
 # ============================================================================
 
-elif nav_choice == "💼 B2B Pre-Print Artwork Sandbox":
+elif nav_choice in (MODE_B2B, "💼 B2B Pre-Print Artwork Sandbox"):
     st.subheader("💼 B2B Pre-Print Compliance Sandbox")
     st.markdown("Commercial pre-flight verification portal for packaging designers and pre-media houses to audit digital artwork and dielines before cylinder engraving.")
 
@@ -860,7 +870,7 @@ elif nav_choice == "💼 B2B Pre-Print Artwork Sandbox":
 # MODE 6: INSPECTION DOSSIERS & VAULT
 # ============================================================================
 
-elif nav_choice == "🗄️ Inspection Dossiers & Vault":
+elif nav_choice in (MODE_VAULT, "🗄️ Inspection Dossiers & Vault"):
     st.subheader("🗄️ Central Legal Metrology Inspection Vault & Audit Trail")
     st.markdown("Search, retrieve, and inspect past packaging compliance case files.")
 
@@ -887,7 +897,7 @@ elif nav_choice == "🗄️ Inspection Dossiers & Vault":
 # MODE 7: ENFORCEMENT ANALYTICS
 # ============================================================================
 
-elif nav_choice == "📊 Enforcement Analytics":
+elif nav_choice in (MODE_ANALYTICS, "📊 Enforcement Analytics"):
     st.subheader("📊 Enforcement Analytics & Compliance Heatmap")
     stats = get_analytics_summary()
 
@@ -907,7 +917,7 @@ elif nav_choice == "📊 Enforcement Analytics":
 # MODE 8: SECTION 36 NOTICE GENERATOR
 # ============================================================================
 
-elif nav_choice == "📜 Section 36 Notice Generator":
+elif nav_choice in (MODE_NOTICE, "📜 Section 36 Notice Generator"):
     st.subheader("📜 Formal Show Cause Notice & Summons Draft Generator")
     st.markdown("Auto-generates statutory notices under Section 36 of the Legal Metrology Act, 2009 for non-compliant brands.")
 

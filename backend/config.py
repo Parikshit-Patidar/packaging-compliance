@@ -36,27 +36,31 @@ def save_config(data: dict):
     except Exception as e:
         print("Failed to save config:", e)
 
-import base64
-
-# Sovereign evaluation key for autonomous multimodal vision operation
-_B64_KEY = "QVEuQWI4Uk42TFJackpEaEF0aVdTU1FvY0Z6Z1pGUWpGTHhzNGdFU0tjZmgwYjBiVlZpbmc="
-try:
-    DEFAULT_EMBEDDED_KEY = base64.b64decode(_B64_KEY).decode("utf-8")
-except Exception:
-    DEFAULT_EMBEDDED_KEY = ""
-
 def get_gemini_api_key() -> Optional[str]:
     # 1. Environment variable
     env_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if env_key and len(env_key.strip()) > 5:
         return env_key.strip()
-    # 2. Config file
+    # 2. Project root .env file check
+    try:
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        env_file = os.path.join(root, ".env")
+        if os.path.exists(env_file):
+            with open(env_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith("GEMINI_API_KEY=") or line.startswith("GOOGLE_API_KEY="):
+                        k = line.split("=", 1)[1].strip().strip('"').strip("'")
+                        if len(k) > 5:
+                            return k
+    except Exception:
+        pass
+    # 3. Persistent config file in AppData / User directory
     cfg = load_config()
     cfg_key = cfg.get("gemini_api_key")
     if cfg_key and len(cfg_key.strip()) > 5:
         return cfg_key.strip()
-    # 3. Default embedded key
-    return DEFAULT_EMBEDDED_KEY if DEFAULT_EMBEDDED_KEY else None
+    return None
 
 def set_gemini_api_key(key: str):
     if key and len(key.strip()) > 5:

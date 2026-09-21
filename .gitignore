@@ -24,6 +24,7 @@ node_modules/
 # Environment Variables & Secrets
 .env
 .env.local
+.env.example
 *.pem
 
 # IDE & OS

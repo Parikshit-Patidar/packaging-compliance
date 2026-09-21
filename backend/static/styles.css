@@ -106,12 +106,13 @@ code, pre, .font-mono {
   background: #ffffff;
   border: 1px solid var(--gov-border);
   border-radius: 0.75rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
-  transition: border-color 0.15s ease;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .gov-card:hover {
   border-color: #cbd5e1;
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.06), 0 2px 4px -1px rgba(15, 23, 42, 0.03);
 }
 
 .gov-card-header {
@@ -512,21 +513,27 @@ code, pre, .font-mono {
   font-weight: 600;
   border-radius: 0.5rem;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   border: 1px solid transparent;
   text-decoration: none;
   white-space: nowrap;
+  user-select: none;
+}
+.gov-btn:active {
+  transform: scale(0.985);
 }
 
 .gov-btn-primary {
   background-color: var(--gov-navy);
   color: #ffffff;
   border-color: var(--gov-navy);
+  box-shadow: 0 1px 2px rgba(12, 32, 51, 0.12);
 }
 .gov-btn-primary:hover {
   background-color: var(--gov-navy-light);
   border-color: var(--gov-navy-light);
   color: #ffffff;
+  box-shadow: 0 3px 6px -1px rgba(12, 32, 51, 0.2);
 }
 
 .gov-btn-secondary {
@@ -537,27 +544,32 @@ code, pre, .font-mono {
 .gov-btn-secondary:hover {
   background-color: #e2e8f0;
   color: var(--gov-navy);
+  border-color: #cbd5e1;
 }
 
 .gov-btn-accent {
   background-color: var(--gov-saffron);
   color: #ffffff;
   border-color: var(--gov-saffron);
+  box-shadow: 0 1px 2px rgba(224, 109, 20, 0.2);
 }
 .gov-btn-accent:hover {
   background-color: #c25e10;
   border-color: #c25e10;
+  box-shadow: 0 3px 6px -1px rgba(224, 109, 20, 0.3);
 }
 
 .gov-btn-outline {
   background-color: #ffffff;
   color: var(--gov-slate);
   border-color: var(--gov-border-strong);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 .gov-btn-outline:hover {
   background-color: #f8fafc;
   border-color: var(--gov-navy);
   color: var(--gov-navy);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 /* Institutional Badges */
@@ -607,20 +619,21 @@ code, pre, .font-mono {
 
 .gov-table th {
   background-color: #f8fafc;
-  color: #475569;
+  color: #334155;
   font-weight: 700;
   font-size: 0.6875rem;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--gov-border);
+  border-bottom: 1.5px solid #cbd5e1;
   text-align: left;
 }
 
 .gov-table td {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--gov-border);
+  border-bottom: 1px solid #e2e8f0;
   color: var(--gov-slate);
+  transition: background-color 0.12s ease;
 }
 
 .gov-table tbody tr:last-child td {
@@ -628,7 +641,7 @@ code, pre, .font-mono {
 }
 
 .gov-table tbody tr:hover td {
-  background-color: #f8fafc;
+  background-color: #f1f5f9;
 }
 
 /* Print Styles for Court Inspection Certificates */

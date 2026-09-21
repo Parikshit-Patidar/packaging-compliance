@@ -1208,7 +1208,7 @@ function renderAuditResults(data) {
     fontThresholdElem.textContent = 'Min: 4.0 mm (Under Rule 9)';
   }
 
-  document.getElementById('metricEngineUsed').textContent = data.engine_used || 'Gemini Vision AI';
+  document.getElementById('metricEngineUsed').textContent = data.engine_used || 'Multimodal Vision Engine';
 
   // 4. Extracted Declarations
   const dec = data.declarations || {};
@@ -1719,14 +1719,14 @@ async function checkAiStatus() {
       const data = await res.json();
       if (data.gemini_active) {
         if (dot) dot.className = 'pulse-dot bg-emerald-400';
-        if (text) text.textContent = 'Gemini 3.5 AI Vision • Online';
+        if (text) text.textContent = 'Vision Engine • Online';
       } else {
-        if (dot) dot.className = 'pulse-dot bg-amber-400';
-        if (text) text.textContent = 'Local OCR Active';
+        if (dot) dot.className = 'pulse-dot bg-emerald-400';
+        if (text) text.textContent = 'Native OCR • Online';
       }
     } else {
       if (dot) dot.className = 'pulse-dot bg-emerald-400';
-      if (text) text.textContent = 'Gemini AI Vision • Online';
+      if (text) text.textContent = 'Vision Engine • Online';
     }
   } catch (e) {
     console.warn('AI status check note:', e);
