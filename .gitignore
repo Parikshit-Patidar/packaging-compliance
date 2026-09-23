@@ -28,6 +28,8 @@ backend/.env
 config.json
 backend/config.json
 .env.local
+.env.example
+logo.png
 *.pem
 
 # IDE & OS
