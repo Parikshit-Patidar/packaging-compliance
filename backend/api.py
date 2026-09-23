@@ -656,6 +656,7 @@ async def scan_and_audit_package(
     file: UploadFile = File(...),
     reference_type: str = Form("AUTO"),
     engine_preference: str = Form("gemini"),
+    model_name: Optional[str] = Form("gemini-3.8-flash"),
     simulated_qr: Optional[str] = Form(None),
     inspector_name: str = Form("Inspector Rajesh Kumar (DL-04)"),
     store_name: str = Form("Apex Retail Mart"),
@@ -701,7 +702,8 @@ async def scan_and_audit_package(
     force_local = (engine_preference.lower() == "winocr")
     dec, raw_transcript, engine_used = extract_packaging_declarations(
         proc_image,
-        force_local=force_local
+        force_local=force_local,
+        preferred_model=model_name
     )
     lines_info = getattr(dec, '_lines_info', [])
 
@@ -937,8 +939,15 @@ def get_ai_status():
     return {
         "gemini_active": bool(key),
         "key_masked": f"{key[:8]}...{key[-4:]}" if key and len(key) > 12 else None,
-        "engine": "Google Gemini Vision AI" if key else "Windows Hardware OCR (Multi-Pass Engine)",
-        "mode": "CLOUD_AI" if key else "LOCAL_OFFLINE"
+        "engine": "Google Gemini (gemini-3.8-flash) Multimodal Vision AI" if key else "Windows Hardware OCR (Multi-Pass Engine)",
+        "mode": "CLOUD_AI" if key else "LOCAL_OFFLINE",
+        "latest_model": "gemini-3.8-flash",
+        "available_models": [
+            {"id": "gemini-3.8-flash", "name": "Gemini 3.8 Flash (Latest Flagship)", "badge": "New Flagship"},
+            {"id": "gemini-3.7-flash", "name": "Gemini 3.7 Flash (Hybrid Reasoning)", "badge": "Fast"},
+            {"id": "gemini-3.6-flash", "name": "Gemini 3.6 Flash (Google Recommended)", "badge": "Recommended"},
+            {"id": "gemini-3.5-flash-lite", "name": "Gemini 3.5 Flash-Lite (High Speed)", "badge": "Low-Latency"}
+        ]
     }
 
 
@@ -948,6 +957,7 @@ class SaveKeyRequest(BaseModel):
 
 class TestKeyRequest(BaseModel):
     api_key: Optional[str] = None
+    preferred_model: Optional[str] = "gemini-3.8-flash"
 
 
 @app.post("/api/v1/config/gemini-key")
@@ -975,7 +985,7 @@ def remove_gemini_key():
 
 @app.post("/api/v1/config/test-key")
 def test_gemini_key(req: TestKeyRequest):
-    """Tests an API key live against Google Gemini 2.5 Flash."""
+    """Tests an API key live against Google Gemini (prioritizing gemini-3.8-flash)."""
     key_to_test = req.api_key.strip() if req.api_key and req.api_key.strip() else get_gemini_api_key()
     if not key_to_test or len(key_to_test) < 8:
         return {
@@ -986,22 +996,46 @@ def test_gemini_key(req: TestKeyRequest):
     try:
         from google import genai
         from google.genai import types
-        client = genai.Client(api_key=key_to_test, http_options=types.HttpOptions(timeout=10000))
-        resp = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents="State OK if you can read this.",
-            config=types.GenerateContentConfig(max_output_tokens=10)
+        client = genai.Client(
+            api_key=key_to_test,
+            http_options=types.HttpOptions(
+                timeout=25000,
+                retry_options=types.HttpRetryOptions(attempts=1)
+            )
         )
-        return {
-            "valid": True,
-            "model": "gemini-2.5-flash",
-            "message": "Connected successfully to Google Gemini 2.5 Flash Vision AI."
-        }
+        
+        models_to_test = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3-flash-preview", "gemini-3.5-flash-lite", "gemini-flash-latest"]
+        if req.preferred_model and req.preferred_model in models_to_test:
+            models_to_test.remove(req.preferred_model)
+            models_to_test.insert(0, req.preferred_model)
+
+        last_err = None
+        for test_m in models_to_test:
+            try:
+                resp = client.models.generate_content(
+                    model=test_m,
+                    contents="State OK if you can read this.",
+                    config=types.GenerateContentConfig(max_output_tokens=10)
+                )
+                return {
+                    "valid": True,
+                    "model": test_m,
+                    "message": f"Connected successfully to Google Gemini ({test_m}) Vision AI."
+                }
+            except Exception as me:
+                last_err = me
+                err_str = str(me)
+                if any(k in err_str for k in ["401", "UNAUTHENTICATED", "ACCOUNT_STATE_INVALID", "API_KEY_INVALID"]):
+                    raise me
+                continue
+
+        if last_err:
+            raise last_err
     except Exception as e:
         err_msg = str(e)
         if "401" in err_msg or "UNAUTHENTICATED" in err_msg or "ACCOUNT_STATE_INVALID" in err_msg:
             clean_err = "401 Unauthenticated: The API key is invalid or its service account is disabled."
-        elif "API_KEY_INVALID" in err_msg or "400" in err_msg:
+        elif "API_KEY_INVALID" in err_msg or "INVALID_API_KEY" in err_msg:
             clean_err = "Invalid API Key: Please verify the key string copied from Google AI Studio."
         elif "RESOURCE_EXHAUSTED" in err_msg or "429" in err_msg:
             clean_err = "429 Rate Limit: Quota exhausted for this API key."

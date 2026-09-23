@@ -1,0 +1,8 @@
+# Private Environment & API Keys
+.env
+*.env
+.env.local
+config.json
+*.db
+__pycache__/
+*.pyc

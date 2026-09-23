@@ -338,6 +338,8 @@ async function executeAudit() {
     // Autonomous reference detection & real Gemini Multimodal Vision AI
     formData.append('reference_type', 'AUTO');
     formData.append('engine_preference', 'gemini');
+    const selectedModel = document.getElementById('selectAiModel')?.value || localStorage.getItem('preferred_ai_model') || 'gemini-3.8-flash';
+    formData.append('model_name', selectedModel);
 
     // QR Payload: send manual override only if explicitly typed by user, otherwise backend auto-detects physical QR
     const inputQr = document.getElementById('inputQrPayload');
@@ -1753,12 +1755,13 @@ async function checkAiStatus() {
       const data = await res.json();
       if (data.gemini_active) {
         if (dot) dot.className = 'pulse-dot bg-emerald-400';
-        if (text) text.textContent = 'Vision AI (Gemini) • Online';
-        if (pill) pill.title = `Active Engine: Google Gemini Vision AI (${data.key_masked || 'Active'}) — Click to configure`;
+        const modelName = data.latest_model || 'Gemini 3.8 Flash';
+        if (text) text.textContent = `Vision AI (${modelName}) • Online`;
+        if (pill) pill.title = `Active Engine: Google Gemini (${modelName}) Vision AI (${data.key_masked || 'Active'}) — Click to configure`;
       } else {
-        if (dot) dot.className = 'pulse-dot bg-blue-400';
+        if (dot) dot.className = 'pulse-dot bg-amber-400';
         if (text) text.textContent = 'Native OCR (Offline) • Online';
-        if (pill) pill.title = 'Active Engine: Windows Hardware OCR (Multi-Pass Engine) — Click to configure AI Key';
+        if (pill) pill.title = 'Active Engine: Windows Hardware OCR (Multi-Pass Engine) — Click to enter Gemini API Key';
       }
     } else {
       if (dot) dot.className = 'pulse-dot bg-blue-400';
@@ -1794,7 +1797,7 @@ async function openApiKeyModal() {
       if (data.gemini_active) {
         if (badge) {
           badge.className = 'text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-mono';
-          badge.textContent = 'Active: Google Gemini Vision AI';
+          badge.textContent = `Active: ${data.engine || 'Google Gemini 3.8 Flash'}`;
         }
         if (label) {
           label.className = 'text-[10px] font-mono text-emerald-700 font-bold bg-emerald-100/70 px-1.5 py-0.5 rounded';
@@ -1803,14 +1806,14 @@ async function openApiKeyModal() {
         if (hint) hint.textContent = `Active: ${data.key_masked || 'Configured'}`;
       } else {
         if (badge) {
-          badge.className = 'text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full font-mono';
-          badge.textContent = 'Active: Windows Native Hardware OCR';
+          badge.className = 'text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full font-mono';
+          badge.textContent = 'Active: Windows Native Hardware OCR (Offline)';
         }
         if (label) {
-          label.className = 'text-[10px] font-mono text-slate-500';
-          label.textContent = 'Not Configured';
+          label.className = 'text-[10px] font-mono text-amber-600 font-semibold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200';
+          label.textContent = 'Key Required for Gemini 3.8';
         }
-        if (hint) hint.textContent = 'No key set (Offline mode)';
+        if (hint) hint.textContent = 'No key set (Offline fallback mode)';
         if (inp) inp.value = '';
       }
     }
@@ -1845,6 +1848,7 @@ async function testApiKey() {
   const inp = document.getElementById('geminiApiKeyInput');
   const resBox = document.getElementById('keyTestResultBox');
   const keyVal = inp ? inp.value.trim() : '';
+  const selModel = document.getElementById('selectAiModel')?.value || 'gemini-3.8-flash';
 
   if (btn) {
     btn.disabled = true;
@@ -1855,7 +1859,7 @@ async function testApiKey() {
     const res = await fetch('/api/v1/config/test-key', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ api_key: keyVal || null })
+      body: JSON.stringify({ api_key: keyVal || null, preferred_model: selModel })
     });
 
     const data = await res.json();
@@ -1864,7 +1868,7 @@ async function testApiKey() {
       if (data.valid) {
         resBox.className = 'p-3 rounded-lg text-xs font-medium border bg-emerald-50 border-emerald-200 text-emerald-800';
         resBox.innerHTML = `<strong>Connected Successfully:</strong> ${data.message}`;
-        showToast('Gemini Vision AI connection verified!');
+        showToast(`Google Gemini (${data.model || selModel}) verified!`);
       } else {
         resBox.className = 'p-3 rounded-lg text-xs font-medium border bg-rose-50 border-rose-200 text-rose-800';
         resBox.innerHTML = `<strong>Authentication Issue:</strong> ${data.message || 'Key invalid'}`;
@@ -1890,6 +1894,7 @@ async function saveApiKey() {
   const btn = document.getElementById('btnSaveApiKey');
   const inp = document.getElementById('geminiApiKeyInput');
   const keyVal = inp ? inp.value.trim() : '';
+  const selModel = document.getElementById('selectAiModel')?.value || 'gemini-3.8-flash';
 
   if (!keyVal || keyVal.length < 8) {
     showToast('Please enter a valid Gemini API key first', true);
@@ -1910,7 +1915,8 @@ async function saveApiKey() {
 
     if (res.ok) {
       const data = await res.json();
-      showToast('Gemini Vision AI key saved & activated!');
+      localStorage.setItem('preferred_ai_model', selModel);
+      showToast(`Google Gemini (${selModel}) key saved & activated!`);
       await checkAiStatus();
       setTimeout(() => {
         closeApiKeyModal();

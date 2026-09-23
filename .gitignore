@@ -23,8 +23,11 @@ node_modules/
 
 # Environment Variables & Secrets
 .env
+*.env
+backend/.env
+config.json
+backend/config.json
 .env.local
-.env.example
 *.pem
 
 # IDE & OS

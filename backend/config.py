@@ -36,36 +36,63 @@ def save_config(data: dict):
     except Exception as e:
         print("Failed to save config:", e)
 
+def load_env_file():
+    """Automatically loads private .env variables from local directory on startup."""
+    candidates = [
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"),
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"),
+        os.path.join(get_config_dir(), ".env"),
+        os.path.join(get_config_dir(), "backend", ".env")
+    ]
+    for p in candidates:
+        if os.path.exists(p):
+            try:
+                with open(p, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith("#") and "=" in line:
+                            k, v = line.split("=", 1)
+                            k = k.strip()
+                            v = v.strip().strip('"').strip("'")
+                            if v:
+                                os.environ[k] = v
+            except Exception:
+                pass
+
+# Load on module startup
+load_env_file()
+
+
 def get_gemini_api_key() -> Optional[str]:
-    # 1. Environment variable
+    # Ensure any changes in local .env are loaded
+    load_env_file()
+    # 1. Environment variable (from .env or shell)
     env_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if env_key and len(env_key.strip()) > 5:
         return env_key.strip()
-    # 2. Project root .env file check
-    try:
-        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        env_file = os.path.join(root, ".env")
-        if os.path.exists(env_file):
-            with open(env_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if line.startswith("GEMINI_API_KEY=") or line.startswith("GOOGLE_API_KEY="):
-                        k = line.split("=", 1)[1].strip().strip('"').strip("'")
-                        if len(k) > 5:
-                            return k
-    except Exception:
-        pass
-    # 3. Persistent config file in AppData / User directory
+    # 2. Persistent config file in AppData / User directory
     cfg = load_config()
     cfg_key = cfg.get("gemini_api_key")
     if cfg_key and len(cfg_key.strip()) > 5:
         return cfg_key.strip()
     return None
 
+
 def set_gemini_api_key(key: str):
     if key and len(key.strip()) > 5:
-        save_config({"gemini_api_key": key.strip()})
-        os.environ["GEMINI_API_KEY"] = key.strip()
+        cleaned_key = key.strip()
+        save_config({"gemini_api_key": cleaned_key})
+        os.environ["GEMINI_API_KEY"] = cleaned_key
+        # Sync directly into private backend .env
+        env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+        try:
+            with open(env_path, "w", encoding="utf-8") as f:
+                f.write("# Sovereign Legal Metrology Packaging Compliance Engine - Private Configuration\n")
+                f.write(f"GEMINI_API_KEY={cleaned_key}\n")
+                f.write("PREFERRED_MODEL=gemini-3.8-flash\n")
+                f.write("API_PORT=8000\n")
+        except Exception as e:
+            print("Failed to sync .env file:", e)
 
 def clear_gemini_api_key():
     p = get_config_path()
