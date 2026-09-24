@@ -245,6 +245,17 @@ def api_info():
     }
 
 
+@app.get("/api/health")
+@app.get("/health")
+@app.get("/healthz")
+def health_check():
+    return {
+        "status": "healthy",
+        "service": "Legal Metrology Compliance Engine API",
+        "version": "2.0.0"
+    }
+
+
 @app.post("/api/v1/rules/validate")
 def validate_rules(req: ValidateDeclarationsRequest):
     """
